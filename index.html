@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#F97316">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>장점 칭찬 타이머</title>
+<title>장점 칭찬 수업 도우미</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌟</text></svg>">
 <style>
   :root{
@@ -13,7 +13,8 @@
     --line:#F0E3D2;
     --accent:#F97316; --accent-soft:#FFEDD5;
     --blue:#0EA5E9; --blue-soft:#E0F2FE;
-    --green:#10B981; --red:#EF4444;
+    --violet:#8B5CF6; --violet-soft:#EDE9FE;
+    --green:#10B981; --green-soft:#DCFCE7; --red:#EF4444;
     --shadow:0 10px 30px rgba(180,120,60,.13);
     --r:22px;
     color-scheme:light;
@@ -25,80 +26,129 @@
     font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
     overflow:hidden; user-select:none;
   }
-  img{max-width:100%}
   button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit}
 
-  /* ---------- 레이아웃 ---------- */
-  #app{height:100%; display:flex; flex-direction:column; padding:clamp(10px,1.6vh,22px) clamp(14px,2vw,34px); gap:clamp(8px,1.2vh,16px)}
+  /* 단계별 테마색 */
+  body[data-stage="1"]{--theme:var(--violet); --theme-soft:var(--violet-soft)}
+  body[data-stage="2"]{--theme:var(--green);  --theme-soft:var(--green-soft)}
+  body[data-stage="3"]{--theme:var(--accent); --theme-soft:var(--accent-soft)}
 
-  /* 상단 */
-  .top{display:flex; align-items:center; gap:clamp(10px,1.4vw,20px); flex:0 0 auto}
-  .round-badge{
-    background:var(--accent); color:#fff; border-radius:999px;
-    padding:.35em 1.1em; font-size:clamp(18px,2.6vh,34px); font-weight:800; letter-spacing:-.02em;
-    box-shadow:var(--shadow); white-space:nowrap;
+  /* ---------- 레이아웃 ---------- */
+  #app{height:100%; display:flex; flex-direction:column; padding:clamp(10px,1.6vh,20px) clamp(14px,2vw,34px); gap:clamp(8px,1.2vh,14px)}
+
+  /* 상단 : 단계 띠 */
+  .top{display:flex; align-items:center; gap:clamp(8px,1vw,16px); flex:0 0 auto}
+  .steps{display:flex; gap:clamp(6px,.8vw,12px); flex:1 1 auto; min-width:0}
+  .step{
+    flex:1 1 0; min-width:0; display:flex; align-items:center; gap:.5em; justify-content:center;
+    background:var(--card); border:2px solid var(--line); border-radius:16px;
+    padding:clamp(7px,1.1vh,13px) clamp(6px,.8vw,14px);
+    font-size:clamp(12px,1.9vh,22px); font-weight:800; color:var(--sub);
+    letter-spacing:-.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    transition:transform .1s;
   }
-  .dots{display:flex; gap:clamp(5px,.7vw,10px); flex-wrap:wrap; flex:1 1 auto; align-items:center}
-  .dot{width:clamp(10px,1.5vh,18px); height:clamp(10px,1.5vh,18px); border-radius:50%; background:#EADBC8}
-  .dot.done{background:var(--accent)}
-  .dot.now{background:var(--blue); box-shadow:0 0 0 clamp(3px,.5vh,6px) var(--blue-soft)}
-  .top .tools{display:flex; gap:8px; flex:0 0 auto}
+  .step:active{transform:translateY(2px)}
+  .step .no{
+    flex:0 0 auto; width:1.7em; height:1.7em; border-radius:50%;
+    background:var(--line); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:.95em; font-weight:900;
+  }
+  .step.on{background:var(--theme); border-color:var(--theme); color:#fff; box-shadow:var(--shadow)}
+  .step.on .no{background:rgba(255,255,255,.3)}
+  .step.past{border-color:var(--theme); color:var(--theme)}
+  .step.past .no{background:var(--theme)}
+  .top .tools{display:flex; gap:6px; flex:0 0 auto}
   .icon-btn{
     background:var(--card); border:2px solid var(--line); border-radius:14px;
-    padding:.45em .8em; font-size:clamp(13px,1.7vh,20px); font-weight:700; color:var(--sub);
+    padding:.45em .8em; font-size:clamp(12px,1.6vh,19px); font-weight:700; color:var(--sub);
   }
-  .icon-btn:hover{border-color:var(--accent); color:var(--accent)}
+  .icon-btn:hover{border-color:var(--theme); color:var(--theme)}
 
   /* 본문 */
   .main{flex:1 1 auto; display:flex; gap:clamp(12px,1.6vw,26px); min-height:0}
   .timer-card{
-    flex:0 0 42%; background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
+    flex:0 0 38%; background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
     display:flex; align-items:center; justify-content:center; position:relative; min-height:0;
   }
-  .ring-wrap{position:relative; width:min(100%,42vh); aspect-ratio:1}
+  .ring-wrap{position:relative; width:min(100%,40vh); aspect-ratio:1}
   svg.ring{width:100%; height:100%; transform:rotate(-90deg)}
   svg.ring circle{fill:none; stroke-linecap:round}
   .ring-bg{stroke:#F3E8DA; stroke-width:16}
-  .ring-fg{stroke:var(--green); stroke-width:16; transition:stroke .4s}
-  .time-text{
-    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1em;
-  }
-  .time{font-size:clamp(48px,13vh,140px); font-weight:800; letter-spacing:-.04em; font-variant-numeric:tabular-nums; line-height:1}
-  .time-sub{font-size:clamp(13px,2vh,24px); color:var(--sub); font-weight:700}
+  .ring-fg{stroke:var(--theme); stroke-width:16; transition:stroke .4s}
+  .time-text{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1em}
+  .time{font-size:clamp(44px,12vh,130px); font-weight:800; letter-spacing:-.04em; font-variant-numeric:tabular-nums; line-height:1}
+  .time-sub{font-size:clamp(12px,1.9vh,23px); color:var(--sub); font-weight:700; text-align:center; padding:0 1em}
   body.warn .ring-fg{stroke:var(--red)}
   body.warn .time{color:var(--red); animation:pulse .9s ease-in-out infinite}
   @keyframes pulse{50%{opacity:.45}}
 
-  .right{flex:1 1 auto; display:flex; flex-direction:column; gap:clamp(10px,1.4vh,18px); min-width:0; min-height:0}
-  .speech{
+  .right{flex:1 1 auto; display:flex; flex-direction:column; gap:clamp(10px,1.3vh,16px); min-width:0; min-height:0}
+  .panel{display:none; flex-direction:column; gap:clamp(10px,1.3vh,16px); flex:1 1 auto; min-height:0}
+  .panel.on{display:flex}
+  .box{
     background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
-    padding:clamp(14px,2.4vh,32px) clamp(16px,2vw,34px);
-    display:flex; flex-direction:column; justify-content:center; gap:clamp(10px,1.6vh,20px); flex:1 1 auto; min-height:0;
+    padding:clamp(14px,2.2vh,30px) clamp(16px,2vw,32px);
   }
+  .box.grow{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:clamp(9px,1.4vh,18px); overflow:auto}
+
+  .lead{font-size:clamp(20px,4.6vh,54px); font-weight:800; letter-spacing:-.03em; line-height:1.25}
+  .book{
+    display:inline-flex; align-items:center; gap:.5em; align-self:flex-start;
+    background:var(--theme-soft); color:var(--ink); border-radius:14px;
+    padding:.35em .9em; font-size:clamp(14px,2.2vh,26px); font-weight:800;
+  }
+  .qlist{display:flex; flex-direction:column; gap:clamp(8px,1.2vh,16px)}
+  .q{display:flex; align-items:flex-start; gap:clamp(9px,1.1vw,16px)}
+  .q .qno{
+    flex:0 0 auto; width:1.9em; height:1.9em; border-radius:50%; background:var(--theme); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:900;
+    font-size:clamp(14px,2.2vh,26px); margin-top:.1em;
+  }
+  .q .qtext{font-size:clamp(17px,3.2vh,38px); font-weight:700; line-height:1.3; letter-spacing:-.02em}
+
   .line{display:flex; align-items:flex-start; gap:clamp(10px,1.2vw,18px)}
   .line .tag{margin-top:.28em}
-  .tag{
-    flex:0 0 auto; border-radius:12px; padding:.3em .8em; font-weight:800;
-    font-size:clamp(14px,2vh,26px); white-space:nowrap;
-  }
+  .tag{flex:0 0 auto; border-radius:12px; padding:.3em .8em; font-weight:800; font-size:clamp(13px,1.9vh,25px); white-space:nowrap}
   .tag.ask{background:var(--blue-soft); color:#0369A1}
   .tag.praise{background:var(--accent-soft); color:#C2410C}
-  .say{font-size:clamp(22px,5.4vh,66px); font-weight:800; letter-spacing:-.03em; line-height:1.25}
-  .speech-note{
-    margin-top:.2em; text-align:center; color:var(--sub); font-weight:700;
-    font-size:clamp(12px,1.9vh,22px);
-  }
+  .say{font-size:clamp(20px,5vh,62px); font-weight:800; letter-spacing:-.03em; line-height:1.25}
   .say .blank{color:var(--accent)}
+  .note{text-align:center; color:var(--sub); font-weight:700; font-size:clamp(12px,1.8vh,21px)}
 
+  /* 라운드 점 */
+  .dots{display:flex; gap:clamp(5px,.6vw,9px); flex-wrap:wrap; align-items:center; justify-content:center}
+  .dot{width:clamp(9px,1.4vh,17px); height:clamp(9px,1.4vh,17px); border-radius:50%; background:#EADBC8}
+  .dot.done{background:var(--accent)}
+  .dot.now{background:var(--blue); box-shadow:0 0 0 clamp(3px,.5vh,6px) var(--blue-soft)}
+  .round-line{display:flex; align-items:center; gap:clamp(10px,1.2vw,18px)}
+  .round-badge{
+    background:var(--accent); color:#fff; border-radius:999px; flex:0 0 auto;
+    padding:.3em 1em; font-size:clamp(14px,2.2vh,28px); font-weight:800; letter-spacing:-.02em; white-space:nowrap;
+  }
+
+  /* 완료 카운터 */
+  .counter{display:flex; align-items:center; justify-content:center; gap:clamp(10px,1.6vw,24px)}
+  .counter .cbtn{
+    width:clamp(46px,7vh,76px); height:clamp(46px,7vh,76px); border-radius:50%;
+    background:var(--theme-soft); color:#166534; font-size:clamp(24px,4vh,42px); font-weight:900;
+    display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow);
+  }
+  .counter .cbtn:active{transform:translateY(2px)}
+  .cnum{font-size:clamp(30px,6vh,68px); font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:-.03em}
+  .cnum .tot{color:var(--sub); font-size:.5em; font-weight:800}
+  .cbar{height:clamp(8px,1.2vh,14px); border-radius:999px; background:var(--line); overflow:hidden; margin-top:.7em}
+  .cbar i{display:block; height:100%; background:var(--green); border-radius:999px; transition:width .3s}
+  .clabel{text-align:center; color:var(--sub); font-weight:800; font-size:clamp(12px,1.8vh,20px); margin-bottom:.5em}
+
+  /* 낱말 띠 */
   .bank{
     background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
-    flex:0 0 auto; overflow:hidden; display:flex; align-items:center;
-    padding:clamp(8px,1.3vh,16px) 0;
+    flex:0 0 auto; overflow:hidden; display:flex; align-items:center; padding:clamp(8px,1.2vh,15px) 0;
   }
   .bank-label{
     flex:0 0 auto; display:flex; align-items:center; align-self:stretch;
     padding:0 clamp(10px,1vw,18px); border-right:2px solid var(--line); margin-right:clamp(6px,.8vw,12px);
-    font-size:clamp(12px,1.7vh,20px); font-weight:800; color:var(--sub); white-space:nowrap;
+    font-size:clamp(11px,1.6vh,19px); font-weight:800; color:var(--sub); white-space:nowrap;
   }
   .bank-track{
     flex:1 1 auto; overflow:hidden; min-width:0;
@@ -111,7 +161,7 @@
   .word{
     margin:0 clamp(6px,.7vw,12px); padding:.32em 1em; border-radius:999px;
     background:var(--accent-soft); color:#9A3412; font-weight:700;
-    font-size:clamp(15px,2.3vh,30px); white-space:nowrap;
+    font-size:clamp(14px,2.2vh,29px); white-space:nowrap;
   }
   .word:nth-child(3n){background:var(--blue-soft); color:#0369A1}
   .word:nth-child(3n+1){background:#DCFCE7; color:#15803D}
@@ -119,15 +169,16 @@
   /* 하단 컨트롤 */
   .controls{flex:0 0 auto; display:flex; gap:clamp(8px,1vw,14px); justify-content:center; flex-wrap:wrap}
   .btn{
-    border-radius:16px; padding:clamp(10px,1.6vh,18px) clamp(16px,2vw,34px);
-    font-size:clamp(15px,2.2vh,28px); font-weight:800; letter-spacing:-.02em;
+    border-radius:16px; padding:clamp(10px,1.5vh,17px) clamp(16px,2vw,32px);
+    font-size:clamp(14px,2.1vh,26px); font-weight:800; letter-spacing:-.02em;
     background:var(--card); border:2px solid var(--line); color:var(--ink); box-shadow:var(--shadow);
     transition:transform .08s;
   }
   .btn:active{transform:translateY(2px)}
-  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff; min-width:clamp(140px,16vw,260px)}
+  .btn.primary{background:var(--theme); border-color:var(--theme); color:#fff; min-width:clamp(130px,15vw,240px)}
   .btn.blue{background:var(--blue); border-color:var(--blue); color:#fff}
   .btn.ghost{color:var(--sub)}
+  .btn[hidden]{display:none}
 
   /* ---------- 오버레이 ---------- */
   .overlay{
@@ -138,112 +189,131 @@
   .overlay.show{display:flex}
   #moveOverlay{background:linear-gradient(160deg,#F97316,#FB923C)}
   #moveOverlay *{color:#fff}
-  .move-bell{font-size:clamp(60px,16vh,180px); animation:shake .6s ease-in-out infinite}
+  .move-bell{font-size:clamp(58px,15vh,170px); animation:shake .6s ease-in-out infinite}
   @keyframes shake{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
-  .move-title{font-size:clamp(34px,9vh,110px); font-weight:900; letter-spacing:-.04em}
-  .move-sub{font-size:clamp(20px,4.2vh,52px); font-weight:800; opacity:.95}
+  .move-title{font-size:clamp(32px,8.5vh,104px); font-weight:900; letter-spacing:-.04em}
+  .move-sub{font-size:clamp(19px,4vh,50px); font-weight:800; opacity:.95}
   .move-count{
-    font-size:clamp(40px,10vh,120px); font-weight:900; font-variant-numeric:tabular-nums;
+    font-size:clamp(38px,9.5vh,114px); font-weight:900; font-variant-numeric:tabular-nums;
     background:rgba(255,255,255,.22); border-radius:28px; padding:.1em .55em;
   }
-
   #doneOverlay{background:linear-gradient(160deg,#0EA5E9,#38BDF8)}
   #doneOverlay *{color:#fff}
-
+  #stepOverlay{background:linear-gradient(160deg,#8B5CF6,#A78BFA)}
+  #stepOverlay *{color:#fff}
   #bankOverlay{background:var(--bg)}
   .bank-grid{
     display:flex; flex-wrap:wrap; gap:clamp(8px,1.4vh,20px); justify-content:center; align-content:center;
     max-width:92vw; max-height:74vh; overflow:auto;
   }
-  .bank-grid .word{font-size:clamp(18px,3.6vh,44px); margin:0}
+  .bank-grid .word{font-size:clamp(17px,3.4vh,42px); margin:0}
 
   /* 설정 */
   #setup{background:rgba(255,247,237,.97); overflow:auto; align-items:flex-start}
   .setup-box{
     background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
-    width:min(940px,94vw); margin:auto; padding:clamp(20px,3vh,40px); text-align:left;
+    width:min(960px,94vw); margin:auto; padding:clamp(20px,3vh,38px); text-align:left;
   }
-  .setup-box h1{font-size:clamp(22px,3.4vh,38px); font-weight:900; letter-spacing:-.03em; margin-bottom:.15em}
-  .setup-box .desc{color:var(--sub); font-size:clamp(13px,1.9vh,20px); margin-bottom:1.2em; line-height:1.5}
-  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:clamp(10px,1.6vh,18px)}
-  label{display:block; font-weight:800; font-size:clamp(13px,1.8vh,18px); margin-bottom:.4em}
+  .setup-box h1{font-size:clamp(21px,3.2vh,36px); font-weight:900; letter-spacing:-.03em; margin-bottom:.15em}
+  .setup-box .desc{color:var(--sub); font-size:clamp(13px,1.8vh,19px); margin-bottom:1.2em; line-height:1.5}
+  .sec-title{
+    display:flex; align-items:center; gap:.5em; margin:1.6em 0 .8em;
+    font-size:clamp(16px,2.3vh,24px); font-weight:900; letter-spacing:-.02em;
+    padding-bottom:.5em; border-bottom:2px solid var(--line);
+  }
+  .sec-title .no{
+    width:1.7em; height:1.7em; border-radius:50%; color:#fff; font-size:.85em;
+    display:flex; align-items:center; justify-content:center; font-weight:900;
+  }
+  .sec-title.s1 .no{background:var(--violet)} .sec-title.s2 .no{background:var(--green)} .sec-title.s3 .no{background:var(--accent)}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:clamp(10px,1.5vh,16px)}
+  label{display:block; font-weight:800; font-size:clamp(13px,1.7vh,17px); margin-bottom:.4em}
   input[type=number],input[type=text],textarea{
-    width:100%; font-family:inherit; font-size:clamp(15px,2vh,20px); font-weight:600;
+    width:100%; font-family:inherit; font-size:clamp(14px,1.9vh,19px); font-weight:600;
     padding:.6em .8em; border:2px solid var(--line); border-radius:12px; background:#FFFDFB; color:var(--ink);
   }
   input:focus,textarea:focus{outline:none; border-color:var(--accent)}
-  textarea{min-height:120px; resize:vertical; line-height:1.6}
-  .row{margin-top:clamp(12px,2vh,22px)}
-  .hint{color:var(--sub); font-size:clamp(12px,1.6vh,16px); margin-top:.5em; line-height:1.55}
-  .switch{display:flex; align-items:center; gap:.6em; font-weight:800; font-size:clamp(14px,1.9vh,19px)}
+  textarea{min-height:96px; resize:vertical; line-height:1.6}
+  .row{margin-top:clamp(10px,1.6vh,18px)}
+  .switch{display:flex; align-items:center; gap:.6em; font-weight:800; font-size:clamp(13px,1.8vh,18px)}
   .switch input{width:1.3em; height:1.3em; accent-color:var(--accent)}
-  .setup-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:clamp(16px,2.6vh,28px); flex-wrap:wrap}
-  .tip{background:var(--blue-soft); border-radius:14px; padding:1em 1.2em; margin-top:1.2em; font-size:clamp(13px,1.8vh,18px); line-height:1.6; color:#0C4A6E}
+  .setup-actions{
+    display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
+    margin-top:clamp(18px,2.6vh,28px); padding-top:clamp(14px,2vh,20px); border-top:2px solid var(--line);
+  }
+  .tip{background:var(--blue-soft); border-radius:14px; padding:1em 1.2em; margin-top:1.2em; font-size:clamp(13px,1.7vh,17px); line-height:1.6; color:#0C4A6E}
   .tip b{color:#075985}
 
   /* ---------- 모바일 / 세로 화면 ---------- */
   @media (max-width:900px), (max-aspect-ratio:1/1){
-    #app{padding:10px 12px 14px; gap:10px}
-    .top{gap:8px; flex-wrap:wrap}
-    .round-badge{font-size:clamp(15px,4.2vw,22px); padding:.3em .9em}
-    .dots{order:3; width:100%; gap:6px}
-    .dot{width:9px; height:9px}
-    .icon-btn{font-size:clamp(12px,3.2vw,15px); padding:.5em .7em; border-radius:12px}
+    #app{padding:9px 11px 13px; gap:9px}
+    .steps{gap:5px}
+    .step{font-size:clamp(11px,3vw,15px); padding:8px 5px; border-radius:13px; gap:.35em}
+    .step .stitle{display:none}
+    .step.on .stitle{display:inline}
+    .icon-btn{font-size:clamp(11px,3vw,14px); padding:.5em .6em; border-radius:12px}
 
-    .main{flex-direction:column; gap:10px}
-    .timer-card{flex:0 0 auto; padding:12px 0}
-    .ring-wrap{width:min(58vw,30vh)}
-    .time{font-size:clamp(40px,15vw,84px)}
-    .time-sub{font-size:clamp(12px,3.2vw,16px)}
+    .main{flex-direction:column; gap:9px}
+    .timer-card{flex:0 0 auto; padding:10px 0}
+    .ring-wrap{width:min(54vw,27vh)}
+    .time{font-size:clamp(38px,14vw,78px)}
+    .time-sub{font-size:clamp(11px,3vw,15px)}
     .ring-bg,.ring-fg{stroke-width:18}
 
-    .right{flex:1 1 auto; gap:10px}
-    .speech{padding:14px 16px; gap:10px}
-    .line{gap:10px}
-    .say{font-size:clamp(19px,5.2vw,30px)}
-    .tag{font-size:clamp(12px,3.2vw,16px); padding:.28em .7em}
+    .right{flex:1 1 auto; gap:9px}
+    .box{padding:13px 15px}
+    .lead{font-size:clamp(17px,4.6vw,27px)}
+    .book{font-size:clamp(13px,3.5vw,17px)}
+    .q .qtext{font-size:clamp(15px,4.1vw,23px)}
+    .q .qno{font-size:clamp(13px,3.4vw,17px)}
+    .say{font-size:clamp(18px,5vw,29px)}
+    .tag{font-size:clamp(11px,3.1vw,15px); padding:.28em .7em}
     .line .tag{margin-top:.2em}
-    .speech-note{font-size:clamp(11px,3vw,14px)}
-    .bank-label{font-size:clamp(11px,3vw,14px)}
-    .word{font-size:clamp(14px,4vw,19px); padding:.3em .85em}
+    .note{font-size:clamp(11px,2.9vw,14px)}
+    .bank-label{font-size:clamp(10px,2.9vw,13px)}
+    .word{font-size:clamp(13px,3.8vw,18px); padding:.3em .8em}
+    .round-badge{font-size:clamp(13px,3.6vw,17px)}
+    .dot{width:9px; height:9px}
+    .cnum{font-size:clamp(26px,7vw,40px)}
+    .counter .cbtn{width:46px; height:46px; font-size:24px}
 
-    .controls{gap:8px}
-    .btn{
-      flex:1 1 0; min-width:84px; min-height:52px; padding:10px 8px;
-      font-size:clamp(14px,3.9vw,19px); border-radius:14px;
-    }
+    .controls{gap:7px}
+    .btn{flex:1 1 0; min-width:78px; min-height:50px; padding:9px 7px; font-size:clamp(13px,3.7vw,18px); border-radius:14px}
     .btn.primary{flex:1 1 100%; min-width:0}
 
-    .move-title{font-size:clamp(30px,9vw,52px)}
-    .move-sub{font-size:clamp(16px,4.6vw,26px)}
-    .move-bell{font-size:clamp(52px,16vw,90px)}
-    .move-count{font-size:clamp(34px,11vw,64px)}
+    .move-title{font-size:clamp(28px,8.5vw,48px)}
+    .move-sub{font-size:clamp(15px,4.4vw,24px)}
+    .move-bell{font-size:clamp(50px,15vw,86px)}
+    .move-count{font-size:clamp(32px,10vw,60px)}
 
-    .setup-box{padding:18px; border-radius:18px}
+    .setup-box{padding:17px; border-radius:18px}
     .grid{grid-template-columns:1fr 1fr}
     .setup-actions .btn{flex:1 1 100%}
   }
 
-  /* 아주 낮은 가로 화면(폰 가로) */
+  /* 폰 가로 */
   @media (max-height:430px) and (min-aspect-ratio:1/1){
     .main{flex-direction:row}
-    .timer-card{flex:0 0 34%}
-    .ring-wrap{width:min(100%,30vh)}
-    .bank{display:none}          /* 자리가 없으면 낱말 띠는 감춤 */
-    .speech-note{display:none}
-    .dots{display:none}
-    .btn, .btn.primary{flex:1 1 0; min-height:44px; font-size:clamp(13px,3vh,17px)}
-    #app{padding:8px 12px 10px; gap:8px}
+    .timer-card{flex:0 0 32%}
+    .ring-wrap{width:min(100%,29vh)}
+    .bank{display:none}
+    .note{display:none}
+    .btn, .btn.primary{flex:1 1 0; min-height:42px; font-size:clamp(12px,2.9vh,16px)}
+    #app{padding:7px 11px 9px; gap:7px}
+    .step .stitle{display:none}
   }
 </style>
 </head>
-<body>
+<body data-stage="1">
 <div id="app">
   <div class="top">
-    <div class="round-badge" id="roundBadge">라운드 1 / 10</div>
-    <div class="dots" id="dots"></div>
+    <div class="steps" id="steps">
+      <button class="step" data-go="1"><span class="no">1</span><span class="stitle">동기유발 · 책 읽기</span></button>
+      <button class="step" data-go="2"><span class="no">2</span><span class="stitle">나의 장점 쓰기</span></button>
+      <button class="step" data-go="3"><span class="no">3</span><span class="stitle">서로 물어보고 조사</span></button>
+    </div>
     <div class="tools">
-      <button class="icon-btn" id="bankBtn">낱말 크게</button>
+      <button class="icon-btn" id="bankBtn">낱말</button>
       <button class="icon-btn" id="fsBtn">전체화면</button>
       <button class="icon-btn" id="setupBtn">설정</button>
     </div>
@@ -257,49 +327,94 @@
           <circle class="ring-fg" id="ringFg" cx="130" cy="130" r="112"></circle>
         </svg>
         <div class="time-text">
-          <div class="time" id="timeText">2:00</div>
+          <div class="time" id="timeText">0:00</div>
           <div class="time-sub" id="timeSub">시작을 눌러 주세요</div>
         </div>
       </div>
     </div>
 
     <div class="right">
-      <div class="speech">
-        <div class="line">
-          <span class="tag ask">묻기</span>
-          <span class="say" id="askText">너의 장점은 무엇이니?</span>
+      <!-- 1단계 -->
+      <div class="panel" id="p1">
+        <div class="box grow">
+          <div class="book" id="s1book">📖 <span id="s1bookName">책 제목</span></div>
+          <div class="lead" id="s1lead">이야기를 함께 읽어 봅시다</div>
+          <div class="qlist" id="s1qs"></div>
         </div>
-        <div class="line">
-          <span class="tag praise">칭찬</span>
-          <span class="say" id="praiseText"></span>
-        </div>
-        <div class="speech-note">친구의 눈을 보고, 웃으면서 말해요 🙂</div>
       </div>
 
-      <div class="bank">
-        <div class="bank-label">장점 낱말</div>
-        <div class="bank-track"><div class="marquee" id="marquee"></div></div>
+      <!-- 2단계 -->
+      <div class="panel" id="p2">
+        <div class="box grow">
+          <div class="lead" id="s2lead">나의 장점을 세 가지 적어 봅시다</div>
+          <div class="note" id="s2note">떠오르지 않으면 아래 낱말에서 골라도 좋아요</div>
+          <div>
+            <div class="clabel">다 쓴 사람</div>
+            <div class="counter">
+              <button class="cbtn" id="cMinus">−</button>
+              <div class="cnum"><span id="cNow">0</span><span class="tot"> / <span id="cTot">24</span></span></div>
+              <button class="cbtn" id="cPlus">+</button>
+            </div>
+            <div class="cbar"><i id="cBar" style="width:0%"></i></div>
+          </div>
+        </div>
+        <div class="bank">
+          <div class="bank-label">장점 낱말</div>
+          <div class="bank-track"><div class="marquee" id="marquee2"></div></div>
+        </div>
+      </div>
+
+      <!-- 3단계 -->
+      <div class="panel" id="p3">
+        <div class="box grow">
+          <div class="round-line">
+            <div class="round-badge" id="roundBadge">라운드 1 / 10</div>
+            <div class="dots" id="dots"></div>
+          </div>
+          <div class="line">
+            <span class="tag ask">묻기</span>
+            <span class="say" id="askText">너의 장점은 무엇이니?</span>
+          </div>
+          <div class="line">
+            <span class="tag praise">칭찬</span>
+            <span class="say" id="praiseText"></span>
+          </div>
+          <div class="note">친구의 눈을 보고, 웃으면서 말해요 🙂</div>
+        </div>
+        <div class="bank">
+          <div class="bank-label">장점 낱말</div>
+          <div class="bank-track"><div class="marquee" id="marquee3"></div></div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="controls">
     <button class="btn primary" id="startBtn">시작</button>
-    <button class="btn" id="plusBtn">+30초</button>
-    <button class="btn blue" id="nextBtn">이동 →</button>
+    <button class="btn" id="plusBtn">+1분</button>
+    <button class="btn blue" id="nextBtn" hidden>이동 →</button>
     <button class="btn ghost" id="resetBtn">처음으로</button>
+    <button class="btn blue" id="stepBtn">다음 단계 →</button>
   </div>
 </div>
 
-<!-- 이동 안내 -->
+<!-- 단계 전환 -->
+<div class="overlay" id="stepOverlay">
+  <div class="move-bell" id="stepIcon">📝</div>
+  <div class="move-title" id="stepTitle">2단계</div>
+  <div class="move-sub" id="stepSub">나의 장점 쓰기</div>
+  <button class="btn" id="stepClose" style="margin-top:2vh">시작하기</button>
+</div>
+
+<!-- 자리 이동 -->
 <div class="overlay" id="moveOverlay">
   <div class="move-bell">🔔</div>
   <div class="move-title">자리를 옮겨요!</div>
   <div class="move-sub" id="moveSub">바깥줄 친구들 → 오른쪽으로 한 칸</div>
-  <div class="move-count" id="moveCount">5</div>
+  <div class="move-count" id="moveCount">8</div>
 </div>
 
-<!-- 활동 종료 -->
+<!-- 종료 -->
 <div class="overlay" id="doneOverlay">
   <div class="move-bell">🎉</div>
   <div class="move-title">활동 끝!</div>
@@ -307,9 +422,9 @@
   <button class="btn" id="doneClose" style="margin-top:2vh">닫기</button>
 </div>
 
-<!-- 낱말 크게 보기 -->
+<!-- 낱말 크게 -->
 <div class="overlay" id="bankOverlay">
-  <div class="move-title" style="color:var(--ink); font-size:clamp(24px,5vh,56px)">장점 낱말</div>
+  <div class="move-title" style="color:var(--ink); font-size:clamp(23px,4.8vh,54px)">장점 낱말</div>
   <div class="bank-grid" id="bankGrid"></div>
   <button class="btn" id="bankClose">닫기</button>
 </div>
@@ -317,59 +432,58 @@
 <!-- 설정 -->
 <div class="overlay" id="setup">
   <div class="setup-box">
-    <h1>활동 설정</h1>
-    <p class="desc">공개수업 전에 한 번만 맞춰 두면 됩니다. 설정은 자동으로 저장돼요.</p>
+    <h1>수업 설정</h1>
+    <p class="desc">공개수업 전에 한 번만 맞춰 두면 됩니다. 설정은 이 브라우저에 자동 저장돼요.</p>
 
+    <div class="sec-title s1"><span class="no">1</span>동기유발 · 책 읽기</div>
     <div class="grid">
-      <div>
-        <label for="cfgRounds">라운드 수</label>
-        <input type="number" id="cfgRounds" min="1" max="30" value="10">
-      </div>
-      <div>
-        <label for="cfgRoundSec">한 라운드 시간(초)</label>
-        <input type="number" id="cfgRoundSec" min="10" max="900" step="10" value="120">
-      </div>
-      <div>
-        <label for="cfgWarnSec">"곧 끝나요" 경고(초)</label>
-        <input type="number" id="cfgWarnSec" min="0" max="120" step="5" value="20">
-      </div>
-      <div>
-        <label for="cfgMoveSec">이동 시간(초)</label>
-        <input type="number" id="cfgMoveSec" min="3" max="60" value="8">
-      </div>
+      <div><label for="c1Sec">읽기 시간(분)</label><input type="number" id="c1Sec" min="1" max="60" value="10"></div>
+      <div><label for="c1Book">책 제목</label><input type="text" id="c1Book" value="너는 특별하단다"></div>
+    </div>
+    <div class="row"><label for="c1Lead">안내 문구</label><input type="text" id="c1Lead" value="이야기를 함께 읽어 봅시다"></div>
+    <div class="row">
+      <label for="c1Qs">생각할 질문 <span style="font-weight:600;color:var(--sub)">(한 줄에 하나씩)</span></label>
+      <textarea id="c1Qs"></textarea>
     </div>
 
-    <div class="row">
-      <label for="cfgAsk">묻는 말</label>
-      <input type="text" id="cfgAsk" value="너의 장점은 무엇이니?">
+    <div class="sec-title s2"><span class="no">2</span>나의 장점 쓰기</div>
+    <div class="grid">
+      <div><label for="c2Sec">쓰기 시간(분)</label><input type="number" id="c2Sec" min="1" max="60" value="5"></div>
+      <div><label for="c2Warn">"곧 끝나요" 경고(초)</label><input type="number" id="c2Warn" min="0" max="120" step="5" value="30"></div>
+      <div><label for="c2Total">학급 인원(명)</label><input type="number" id="c2Total" min="1" max="60" value="24"></div>
     </div>
-    <div class="row">
-      <label for="cfgPraise">칭찬하는 말 <span style="font-weight:600;color:var(--sub)">(○○○ 자리는 그대로 두세요)</span></label>
-      <input type="text" id="cfgPraise" value="너의 장점이 ○○○이구나. 정말 멋져!">
-    </div>
-    <div class="row">
-      <label for="cfgMove">이동 안내 문구</label>
-      <input type="text" id="cfgMove" value="바깥줄 친구들 → 오른쪽으로 한 칸">
-    </div>
-    <div class="row">
-      <label for="cfgWords">장점 낱말 <span style="font-weight:600;color:var(--sub)">(쉼표 또는 줄바꿈으로 구분)</span></label>
-      <textarea id="cfgWords"></textarea>
-    </div>
+    <div class="row"><label for="c2Lead">안내 문구</label><input type="text" id="c2Lead" value="나의 장점을 세 가지 적어 봅시다"></div>
 
+    <div class="sec-title s3"><span class="no">3</span>서로 물어보고 조사하기</div>
+    <div class="grid">
+      <div><label for="c3Rounds">라운드 수</label><input type="number" id="c3Rounds" min="1" max="30" value="10"></div>
+      <div><label for="c3Sec">한 라운드(초)</label><input type="number" id="c3Sec" min="10" max="900" step="10" value="120"></div>
+      <div><label for="c3Warn">경고(초)</label><input type="number" id="c3Warn" min="0" max="120" step="5" value="20"></div>
+      <div><label for="c3Move">이동 시간(초)</label><input type="number" id="c3Move" min="3" max="60" value="8"></div>
+    </div>
+    <div class="row"><label for="c3Ask">묻는 말</label><input type="text" id="c3Ask" value="너의 장점은 무엇이니?"></div>
+    <div class="row"><label for="c3Praise">칭찬하는 말 <span style="font-weight:600;color:var(--sub)">(○○○ 자리는 그대로 두세요)</span></label><input type="text" id="c3Praise" value="너의 장점이 ○○○이구나. 정말 멋져!"></div>
+    <div class="row"><label for="c3MoveMsg">이동 안내 문구</label><input type="text" id="c3MoveMsg" value="바깥줄 친구들 → 오른쪽으로 한 칸"></div>
+
+    <div class="sec-title"><span class="no" style="background:var(--sub)">＋</span>공통</div>
+    <div class="row">
+      <label for="cWords">장점 낱말 <span style="font-weight:600;color:var(--sub)">(쉼표 또는 줄바꿈으로 구분 · 2·3단계에서 사용)</span></label>
+      <textarea id="cWords"></textarea>
+    </div>
     <div class="row switch">
-      <input type="checkbox" id="cfgSound" checked>
-      <label for="cfgSound" style="margin:0">소리 켜기 (종소리 · 경고음)</label>
+      <input type="checkbox" id="cSound" checked>
+      <label for="cSound" style="margin:0">소리 켜기 (종소리 · 경고음)</label>
     </div>
 
     <div class="tip">
-      <b>자리 배치</b> — 책상을 두 줄로 마주 보게 놓고, <b>안쪽 줄은 그대로</b>, <b>바깥줄만 오른쪽으로 한 칸</b> 옮기면 됩니다.
-      맨 끝 친구는 반대쪽 끝으로 가요. 이렇게 하면 <b>학급 인원의 절반만큼 라운드</b>를 돌았을 때 모두가 서로 한 번씩 만납니다.<br>
-      <b>홀수 학급</b>이면 한 자리를 <b>3명(듣는 친구 1명 추가)</b>으로 만들거나 선생님이 한 자리에 들어가면 자연스럽습니다.
+      <b>3단계 자리 배치</b> — 책상을 두 줄로 마주 보게 놓고, <b>안쪽 줄은 그대로</b>, <b>바깥줄만 오른쪽으로 한 칸</b> 옮기면 됩니다.
+      맨 끝 학생은 반대쪽 끝으로. 이렇게 하면 <b>학급 인원의 절반만큼 라운드</b>를 돌았을 때 모두가 서로 한 번씩 만납니다.<br>
+      <b>홀수 학급</b>이면 한 자리를 <b>3명</b>으로 만들거나 선생님이 한 자리에 들어가면 자연스럽습니다.
     </div>
 
     <div class="setup-actions">
       <button class="btn ghost" id="cfgDefault">기본값으로</button>
-      <button class="btn primary" id="cfgSave">저장하고 시작 화면으로</button>
+      <button class="btn primary" id="cfgSave">저장하고 닫기</button>
     </div>
   </div>
 </div>
@@ -386,42 +500,60 @@
     "끈기가 있어요","생각이 깊어요","호기심이 많아요","계산이 빨라요","손이 야무져요",
     "먼저 사과해요","같이 놀자고 해줘요","질문을 잘해요","포기하지 않아요"
   ];
+  var DEFAULT_QS = [
+    "주인공은 왜 그렇게 느꼈을까요?",
+    "나와 비슷한 점이 있었나요?",
+    "나에게도 이런 좋은 점이 있을까요?"
+  ];
 
   var DEFAULTS = {
-    rounds:10, roundSec:120, warnSec:20, moveSec:8, sound:true,
-    ask:"너의 장점은 무엇이니?",
-    praise:"너의 장점이 ○○○이구나. 정말 멋져!",
-    moveMsg:"바깥줄 친구들 → 오른쪽으로 한 칸",
-    words:DEFAULT_WORDS.slice()
+    sound:true,
+    words:DEFAULT_WORDS.slice(),
+    s1:{ sec:600, book:"너는 특별하단다", lead:"이야기를 함께 읽어 봅시다", qs:DEFAULT_QS.slice() },
+    s2:{ sec:300, warn:30, total:24, lead:"나의 장점을 세 가지 적어 봅시다" },
+    s3:{ rounds:10, sec:120, warn:20, move:8,
+         ask:"너의 장점은 무엇이니?",
+         praise:"너의 장점이 ○○○이구나. 정말 멋져!",
+         moveMsg:"바깥줄 친구들 → 오른쪽으로 한 칸" }
   };
 
-  var KEY_CFG = "praise_cfg_v1", KEY_STATE = "praise_state_v1";
-  var cfg = load(KEY_CFG, DEFAULTS);
-  var st  = load(KEY_STATE, {round:1, remain:cfg.roundSec*1000, phase:"idle"});
+  var KEY_CFG = "praise_cfg_v2";
+  var cfg = loadCfg();
+
+  // ---------- 상태 ----------
+  var stage = 1;                        // 1 · 2 · 3
+  var T = { remain:0, total:0, run:false, warned:false };
+  var round = 1;                        // 3단계 라운드
+  var doneCount = 0;                    // 2단계 완료 인원
 
   // ---------- DOM ----------
   var $ = function(id){ return document.getElementById(id); };
-  var roundBadge=$("roundBadge"), dots=$("dots"), timeText=$("timeText"), timeSub=$("timeSub"),
-      ringFg=$("ringFg"), askEl=$("askText"), praiseEl=$("praiseText"), marquee=$("marquee"),
-      startBtn=$("startBtn"), plusBtn=$("plusBtn"), nextBtn=$("nextBtn"), resetBtn=$("resetBtn"),
+  var timeText=$("timeText"), timeSub=$("timeSub"), ringFg=$("ringFg"),
+      startBtn=$("startBtn"), plusBtn=$("plusBtn"), nextBtn=$("nextBtn"),
+      resetBtn=$("resetBtn"), stepBtn=$("stepBtn"),
       moveOverlay=$("moveOverlay"), moveCount=$("moveCount"), moveSub=$("moveSub"),
       doneOverlay=$("doneOverlay"), bankOverlay=$("bankOverlay"), bankGrid=$("bankGrid"),
-      setup=$("setup");
+      stepOverlay=$("stepOverlay"), setup=$("setup");
 
   var RING_C = 2 * Math.PI * 112;
   ringFg.style.strokeDasharray = RING_C;
 
   // ---------- 저장 ----------
-  function load(k, fb){
-    try{
-      var v = JSON.parse(localStorage.getItem(k));
-      if(!v || typeof v !== "object") return JSON.parse(JSON.stringify(fb));
-      for(var p in fb){ if(!(p in v)) v[p] = fb[p]; }
-      return v;
-    }catch(e){ return JSON.parse(JSON.stringify(fb)); }
+  function merge(fb, v){
+    if(!v || typeof v !== "object") return JSON.parse(JSON.stringify(fb));
+    var out = JSON.parse(JSON.stringify(fb));
+    for(var k in fb){
+      if(!(k in v)) continue;
+      if(fb[k] && typeof fb[k] === "object" && !Array.isArray(fb[k])) out[k] = merge(fb[k], v[k]);
+      else if(v[k] !== null && v[k] !== undefined) out[k] = v[k];
+    }
+    return out;
   }
-  function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
-  function saveState(){ save(KEY_STATE, {round:st.round, remain:st.remain, phase:(st.phase==="run"?"paused":st.phase)}); }
+  function loadCfg(){
+    try{ return merge(DEFAULTS, JSON.parse(localStorage.getItem(KEY_CFG))); }
+    catch(e){ return JSON.parse(JSON.stringify(DEFAULTS)); }
+  }
+  function saveCfg(){ try{ localStorage.setItem(KEY_CFG, JSON.stringify(cfg)); }catch(e){} }
 
   // ---------- 소리 ----------
   var ac = null;
@@ -447,6 +579,7 @@
   function bell(){ tone(880,1.4,.35,"sine",0); tone(1320,1.2,.18,"sine",0.02); tone(660,1.6,.14,"sine",0.04); }
   function warnBeep(){ tone(520,.16,.22,"triangle",0); tone(520,.16,.22,"triangle",0.25); }
   function tick(){ tone(700,.09,.16,"square",0); }
+  function ding(){ tone(1046,.5,.22,"sine",0); }
 
   // ---------- 화면 꺼짐 방지 ----------
   var wakeLock = null;
@@ -454,90 +587,134 @@
     try{
       if(on && "wakeLock" in navigator && !wakeLock){
         navigator.wakeLock.request("screen").then(function(l){
-          wakeLock = l;
-          l.addEventListener("release", function(){ wakeLock = null; });
+          wakeLock = l; l.addEventListener("release", function(){ wakeLock = null; });
         }).catch(function(){});
       }else if(!on && wakeLock){ wakeLock.release(); wakeLock = null; }
     }catch(e){}
   }
   document.addEventListener("visibilitychange", function(){
-    if(document.visibilityState === "visible" && st.phase === "run") keepAwake(true);
+    if(document.visibilityState === "visible" && T.run) keepAwake(true);
   });
 
-  // ---------- 그리기 ----------
+  // ---------- 유틸 ----------
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
   function fmt(ms){
     var s = Math.max(0, Math.ceil(ms/1000));
     return Math.floor(s/60) + ":" + ("0" + (s%60)).slice(-2);
   }
+  function warnSec(){ return stage===2 ? cfg.s2.warn : (stage===3 ? cfg.s3.warn : 0); }
+
+  // ---------- 낱말 ----------
   function renderWords(){
     var html = cfg.words.map(function(w){ return '<span class="word">'+esc(w)+'</span>'; }).join("");
-    marquee.innerHTML = html + html;                 // 이어붙여 끊김 없이 흐르게
+    $("marquee2").innerHTML = html + html;
+    $("marquee3").innerHTML = html + html;
     bankGrid.innerHTML = html;
   }
-  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){
-    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
-  function renderPraise(){
-    askEl.textContent = cfg.ask;
-    praiseEl.innerHTML = esc(cfg.praise).replace(/○+/g, function(m){
-      return '<span class="blank">'+m+'</span>'; });
-  }
-  function renderDots(){
-    var h = "";
-    for(var i=1; i<=cfg.rounds; i++){
-      h += '<span class="dot '+(i<st.round?"done":(i===st.round?"now":""))+'"></span>';
+  // ---------- 단계별 화면 ----------
+  function renderStageChrome(){
+    document.body.setAttribute("data-stage", String(stage));
+    var btns = document.querySelectorAll(".step");
+    for(var i=0; i<btns.length; i++){
+      var n = i + 1;
+      btns[i].className = "step" + (n===stage ? " on" : (n<stage ? " past" : ""));
     }
-    dots.innerHTML = h;
+    $("p1").className = "panel" + (stage===1 ? " on" : "");
+    $("p2").className = "panel" + (stage===2 ? " on" : "");
+    $("p3").className = "panel" + (stage===3 ? " on" : "");
+    nextBtn.hidden = (stage !== 3);
+    stepBtn.hidden = (stage === 3);
+    plusBtn.textContent = (stage === 3) ? "+30초" : "+1분";
+  }
+  function renderS1(){
+    $("s1bookName").textContent = cfg.s1.book;
+    $("s1book").style.display = cfg.s1.book ? "inline-flex" : "none";
+    $("s1lead").textContent = cfg.s1.lead;
+    $("s1qs").innerHTML = cfg.s1.qs.map(function(q,i){
+      return '<div class="q"><span class="qno">'+(i+1)+'</span><span class="qtext">'+esc(q)+'</span></div>';
+    }).join("");
+  }
+  function renderS2(){
+    $("s2lead").textContent = cfg.s2.lead;
+    $("cTot").textContent = cfg.s2.total;
+    $("cNow").textContent = doneCount;
+    $("cBar").style.width = Math.min(100, cfg.s2.total ? doneCount/cfg.s2.total*100 : 0) + "%";
+  }
+  function renderS3(){
+    $("roundBadge").textContent = "라운드 " + Math.min(round, cfg.s3.rounds) + " / " + cfg.s3.rounds;
+    $("askText").textContent = cfg.s3.ask;
+    $("praiseText").innerHTML = esc(cfg.s3.praise).replace(/○+/g, function(m){
+      return '<span class="blank">'+m+'</span>'; });
+    var h = "";
+    for(var i=1; i<=cfg.s3.rounds; i++){
+      h += '<span class="dot '+(i<round?"done":(i===round?"now":""))+'"></span>';
+    }
+    $("dots").innerHTML = h;
+  }
+  function renderTimer(){
+    timeText.textContent = fmt(T.remain);
+    var p = T.total > 0 ? Math.max(0, Math.min(1, T.remain/T.total)) : 0;
+    ringFg.style.strokeDashoffset = RING_C * (1-p);
+    document.body.classList.toggle("warn", T.run && warnSec() > 0 && T.remain <= warnSec()*1000);
+    startBtn.textContent = T.run ? "일시정지" : (T.remain < T.total ? "이어서" : "시작");
+    timeSub.textContent = T.run
+      ? (stage===1 ? "함께 읽는 중" : stage===2 ? "장점을 쓰는 중" : "이야기 나누는 중")
+      : (T.remain <= 0 ? "시간이 다 되었어요" : (T.remain < T.total ? "잠깐 멈춤" : "시작을 눌러 주세요"));
   }
   function render(){
-    roundBadge.textContent = "라운드 " + Math.min(st.round, cfg.rounds) + " / " + cfg.rounds;
-    timeText.textContent = fmt(st.remain);
-    var total = cfg.roundSec*1000;
-    var p = Math.max(0, Math.min(1, st.remain/total));
-    ringFg.style.strokeDashoffset = RING_C * (1-p);
-    document.body.classList.toggle("warn", st.phase==="run" && st.remain <= cfg.warnSec*1000);
-    startBtn.textContent = (st.phase==="run") ? "일시정지" : (st.phase==="paused" ? "이어서" : "시작");
-    timeSub.textContent =
-      st.phase==="run"    ? "이야기 나누는 중" :
-      st.phase==="paused" ? "잠깐 멈춤" :
-      st.phase==="done"   ? "활동을 마쳤어요" : "시작을 눌러 주세요";
-    renderDots();
+    renderStageChrome();
+    if(stage===1) renderS1(); else if(stage===2) renderS2(); else renderS3();
+    renderTimer();
   }
 
-  // ---------- 타이머 ----------
-  var last = 0, loopId = null, warned = false;
-  function loop(){
+  // ---------- 타이머 엔진 ----------
+  var last = 0, loopId = null;
+  function engine(){
     var now = Date.now(), dt = now - last; last = now;
-    if(st.phase === "run"){
-      st.remain -= dt;
-      if(!warned && st.remain <= cfg.warnSec*1000 && cfg.warnSec > 0){ warned = true; warnBeep(); }
-      if(st.remain <= 0){ st.remain = 0; render(); goMove(); return; }
-      render();
-    }
+    if(!T.run) return;
+    T.remain -= dt;
+    if(!T.warned && warnSec() > 0 && T.remain <= warnSec()*1000){ T.warned = true; warnBeep(); }
+    if(T.remain <= 0){ T.remain = 0; onTimeUp(); return; }
+    renderTimer();
   }
-  function startLoop(){ if(!loopId){ last = Date.now(); loopId = setInterval(loop, 100); } }
+  function startLoop(){ if(!loopId){ last = Date.now(); loopId = setInterval(engine, 100); } }
   function stopLoop(){ if(loopId){ clearInterval(loopId); loopId = null; } }
 
+  function setTimer(sec){
+    T.total = sec * 1000; T.remain = T.total; T.run = false; T.warned = false;
+    document.body.classList.remove("warn");
+  }
   function play(){
-    if(st.phase === "done"){ resetAll(); }
-    audio();                                          // 첫 클릭에서 오디오 활성화
-    st.phase = "run"; warned = st.remain <= cfg.warnSec*1000;
-    keepAwake(true); startLoop(); render(); saveState();
+    if(T.remain <= 0) resetTimer();
+    audio();
+    T.run = true; T.warned = warnSec() > 0 && T.remain <= warnSec()*1000;
+    keepAwake(true); startLoop(); renderTimer();
   }
-  function pause(){
-    st.phase = "paused"; keepAwake(false); render(); saveState();
-  }
-  function toggle(){ (st.phase === "run") ? pause() : play(); }
+  function pause(){ T.run = false; keepAwake(false); renderTimer(); }
+  function toggle(){ T.run ? pause() : play(); }
 
-  // ---------- 이동 ----------
+  function stageSec(){
+    return stage===1 ? cfg.s1.sec : stage===2 ? cfg.s2.sec : cfg.s3.sec;
+  }
+  function resetTimer(){ setTimer(stageSec()); }
+
+  function onTimeUp(){
+    T.run = false; stopLoop(); keepAwake(false);
+    document.body.classList.remove("warn");
+    if(stage === 3){ goMove(); return; }
+    bell(); renderTimer();
+  }
+
+  // ---------- 3단계 : 자리 이동 ----------
   var moveTimer = null;
   function goMove(){
     stopLoop();
-    if(st.round >= cfg.rounds){ finish(); return; }
-    st.phase = "move"; document.body.classList.remove("warn");
+    if(round >= cfg.s3.rounds){ finish(); return; }
     bell();
-    moveSub.textContent = cfg.moveMsg;
-    var left = cfg.moveSec;
+    moveSub.textContent = cfg.s3.moveMsg;
+    var left = cfg.s3.move;
     moveCount.textContent = left;
     moveOverlay.classList.add("show");
     clearInterval(moveTimer);
@@ -548,33 +725,62 @@
       if(left <= 0){
         clearInterval(moveTimer);
         moveOverlay.classList.remove("show");
-        st.round++; st.remain = cfg.roundSec*1000; warned = false;
-        play();
+        round++; setTimer(cfg.s3.sec); renderS3(); play();
       }
     }, 1000);
-    saveState();
   }
   function finish(){
     stopLoop(); clearInterval(moveTimer);
-    st.phase = "done"; document.body.classList.remove("warn");
     bell(); setTimeout(bell, 700);
     keepAwake(false);
     doneOverlay.classList.add("show");
-    render(); saveState();
+    render();
   }
-  function resetAll(){
+
+  // ---------- 단계 이동 ----------
+  var STEP_INFO = {
+    1:{icon:"📖", title:"1단계", sub:"동기유발 · 책 읽기"},
+    2:{icon:"📝", title:"2단계", sub:"나의 장점 쓰기"},
+    3:{icon:"🤝", title:"3단계", sub:"서로 물어보고 조사하기"}
+  };
+  function gotoStage(n, announce){
+    if(n < 1 || n > 3) return;
     stopLoop(); clearInterval(moveTimer);
     moveOverlay.classList.remove("show"); doneOverlay.classList.remove("show");
-    st.round = 1; st.remain = cfg.roundSec*1000; st.phase = "idle"; warned = false;
-    document.body.classList.remove("warn");
-    keepAwake(false); render(); saveState();
+    T.run = false; keepAwake(false);
+    stage = n;
+    if(n === 3) round = 1;
+    resetTimer();
+    render();
+    if(announce){
+      var s = STEP_INFO[n];
+      $("stepIcon").textContent = s.icon;
+      $("stepTitle").textContent = s.title;
+      $("stepSub").textContent = s.sub;
+      stepOverlay.classList.add("show");
+      ding();
+    }
   }
 
   // ---------- 버튼 ----------
   startBtn.onclick = toggle;
-  plusBtn.onclick  = function(){ st.remain += 30000; warned = false; render(); saveState(); };
-  nextBtn.onclick  = function(){ if(st.phase==="move") return; st.remain = 0; render(); goMove(); };
-  resetBtn.onclick = function(){ if(confirm("처음(라운드 1)으로 되돌릴까요?")) resetAll(); };
+  plusBtn.onclick  = function(){
+    var add = (stage === 3) ? 30000 : 60000;
+    T.remain += add; T.total = Math.max(T.total, T.remain); T.warned = false;
+    document.body.classList.remove("warn"); renderTimer();
+  };
+  nextBtn.onclick  = function(){ if(stage !== 3) return; T.remain = 0; T.run = false; goMove(); };
+  resetBtn.onclick = function(){
+    if(stage === 3 && round > 1){
+      if(!confirm("3단계를 라운드 1부터 다시 시작할까요?")) return;
+      round = 1;
+    }
+    stopLoop(); clearInterval(moveTimer);
+    moveOverlay.classList.remove("show"); doneOverlay.classList.remove("show");
+    keepAwake(false); resetTimer(); render();
+  };
+  stepBtn.onclick = function(){ gotoStage(stage + 1, true); };
+  $("stepClose").onclick = function(){ stepOverlay.classList.remove("show"); play(); };
   $("doneClose").onclick = function(){ doneOverlay.classList.remove("show"); };
   $("bankBtn").onclick   = function(){ bankOverlay.classList.add("show"); };
   $("bankClose").onclick = function(){ bankOverlay.classList.remove("show"); };
@@ -582,58 +788,95 @@
     if(document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen().catch(function(){});
   };
+  $("cPlus").onclick  = function(){ if(doneCount < cfg.s2.total){ doneCount++; ding(); renderS2(); } };
+  $("cMinus").onclick = function(){ if(doneCount > 0){ doneCount--; renderS2(); } };
+
+  var stepEls = document.querySelectorAll(".step");
+  for(var i=0; i<stepEls.length; i++){
+    (function(el){
+      el.onclick = function(){ gotoStage(parseInt(el.getAttribute("data-go"),10), false); };
+    })(stepEls[i]);
+  }
 
   document.addEventListener("keydown", function(e){
     if(setup.classList.contains("show")) return;
     if(e.code === "Space"){ e.preventDefault(); toggle(); }
-    else if(e.code === "ArrowRight"){ e.preventDefault(); nextBtn.click(); }
+    else if(e.code === "ArrowRight"){ e.preventDefault(); if(stage===3) nextBtn.click(); else stepBtn.click(); }
+    else if(e.code === "ArrowLeft"){ e.preventDefault(); gotoStage(stage - 1, false); }
     else if(e.code === "ArrowUp"){ e.preventDefault(); plusBtn.click(); }
+    else if(e.key === "1" || e.key === "2" || e.key === "3"){ gotoStage(parseInt(e.key,10), false); }
     else if(e.key === "f" || e.key === "F"){ $("fsBtn").click(); }
-    else if(e.key === "Escape"){ bankOverlay.classList.remove("show"); }
+    else if(e.key === "Escape"){
+      bankOverlay.classList.remove("show");
+      stepOverlay.classList.remove("show");
+      doneOverlay.classList.remove("show");
+    }
   });
 
   // ---------- 설정 ----------
   function fillSetup(){
-    $("cfgRounds").value = cfg.rounds;
-    $("cfgRoundSec").value = cfg.roundSec;
-    $("cfgWarnSec").value = cfg.warnSec;
-    $("cfgMoveSec").value = cfg.moveSec;
-    $("cfgAsk").value = cfg.ask;
-    $("cfgPraise").value = cfg.praise;
-    $("cfgMove").value = cfg.moveMsg;
-    $("cfgWords").value = cfg.words.join(", ");
-    $("cfgSound").checked = !!cfg.sound;
+    $("c1Sec").value   = Math.round(cfg.s1.sec/60);
+    $("c1Book").value  = cfg.s1.book;
+    $("c1Lead").value  = cfg.s1.lead;
+    $("c1Qs").value    = cfg.s1.qs.join("\n");
+    $("c2Sec").value   = Math.round(cfg.s2.sec/60);
+    $("c2Warn").value  = cfg.s2.warn;
+    $("c2Total").value = cfg.s2.total;
+    $("c2Lead").value  = cfg.s2.lead;
+    $("c3Rounds").value  = cfg.s3.rounds;
+    $("c3Sec").value     = cfg.s3.sec;
+    $("c3Warn").value    = cfg.s3.warn;
+    $("c3Move").value    = cfg.s3.move;
+    $("c3Ask").value     = cfg.s3.ask;
+    $("c3Praise").value  = cfg.s3.praise;
+    $("c3MoveMsg").value = cfg.s3.moveMsg;
+    $("cWords").value = cfg.words.join(", ");
+    $("cSound").checked = !!cfg.sound;
   }
-  function num(el, min, max, fb){
-    var v = parseInt(el.value, 10);
-    if(isNaN(v) || v < min || v > max) return fb;
-    return v;
+  function num(id, min, max, fb){
+    var v = parseInt($(id).value, 10);
+    return (isNaN(v) || v < min || v > max) ? fb : v;
   }
-  $("setupBtn").onclick = function(){ if(st.phase==="run") pause(); fillSetup(); setup.classList.add("show"); };
+  function txt(id, fb){ var v = $(id).value.trim(); return v || fb; }
+  function lines(id, fb){
+    var a = $(id).value.split("\n").map(function(s){ return s.trim(); })
+              .filter(function(s){ return s.length > 0; });
+    return a.length ? a : fb;
+  }
+  $("setupBtn").onclick = function(){ if(T.run) pause(); fillSetup(); setup.classList.add("show"); setup.scrollTop = 0; };
   $("cfgDefault").onclick = function(){ cfg = JSON.parse(JSON.stringify(DEFAULTS)); fillSetup(); };
   $("cfgSave").onclick = function(){
-    cfg.rounds   = num($("cfgRounds"), 1, 30, cfg.rounds);
-    cfg.roundSec = num($("cfgRoundSec"), 10, 900, cfg.roundSec);
-    cfg.warnSec  = num($("cfgWarnSec"), 0, 120, cfg.warnSec);
-    cfg.moveSec  = num($("cfgMoveSec"), 3, 60, cfg.moveSec);
-    cfg.ask      = $("cfgAsk").value.trim()    || DEFAULTS.ask;
-    cfg.praise   = $("cfgPraise").value.trim() || DEFAULTS.praise;
-    cfg.moveMsg  = $("cfgMove").value.trim()   || DEFAULTS.moveMsg;
-    cfg.sound    = $("cfgSound").checked;
-    var ws = $("cfgWords").value.split(/[,\n]/).map(function(s){ return s.trim(); })
+    cfg.s1.sec  = num("c1Sec", 1, 60, 10) * 60;
+    cfg.s1.book = $("c1Book").value.trim();
+    cfg.s1.lead = txt("c1Lead", DEFAULTS.s1.lead);
+    cfg.s1.qs   = lines("c1Qs", DEFAULTS.s1.qs.slice());
+
+    cfg.s2.sec   = num("c2Sec", 1, 60, 5) * 60;
+    cfg.s2.warn  = num("c2Warn", 0, 120, 30);
+    cfg.s2.total = num("c2Total", 1, 60, 24);
+    cfg.s2.lead  = txt("c2Lead", DEFAULTS.s2.lead);
+
+    cfg.s3.rounds  = num("c3Rounds", 1, 30, 10);
+    cfg.s3.sec     = num("c3Sec", 10, 900, 120);
+    cfg.s3.warn    = num("c3Warn", 0, 120, 20);
+    cfg.s3.move    = num("c3Move", 3, 60, 8);
+    cfg.s3.ask     = txt("c3Ask", DEFAULTS.s3.ask);
+    cfg.s3.praise  = txt("c3Praise", DEFAULTS.s3.praise);
+    cfg.s3.moveMsg = txt("c3MoveMsg", DEFAULTS.s3.moveMsg);
+
+    var ws = $("cWords").value.split(/[,\n]/).map(function(s){ return s.trim(); })
                 .filter(function(s){ return s.length > 0; });
     cfg.words = ws.length ? ws : DEFAULTS.words.slice();
-    save(KEY_CFG, cfg);
+    cfg.sound = $("cSound").checked;
+
+    saveCfg();
     setup.classList.remove("show");
-    resetAll(); renderWords(); renderPraise(); render();
+    if(doneCount > cfg.s2.total) doneCount = cfg.s2.total;
+    renderWords(); resetTimer(); render();
   };
 
   // ---------- 시작 ----------
-  if(st.phase === "run" || st.phase === "move") st.phase = "paused";   // 새로고침 복구
-  if(!(st.remain > 0)) st.remain = cfg.roundSec*1000;
-  if(!(st.round >= 1)) st.round = 1;
-  renderWords(); renderPraise(); render();
+  renderWords();
+  gotoStage(1, false);
 })();
-</script>
-</body>
-</html>
+</script></body></html>
