@@ -28,6 +28,7 @@
     color-scheme:light;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent}
+  [hidden]{display:none !important}
   html,body{height:100%; height:100dvh}
   body{
     color:var(--ink);
@@ -226,6 +227,26 @@
   .mir.b{background:#FEF3C7;            color:#92400E}
   .mir.c{background:var(--teal-soft);   color:#115E59}
 
+  /* 수업 자료 그림 */
+  .split{display:flex; gap:clamp(10px,1.3vw,22px); align-items:center; flex:1 1 auto; min-height:0}
+  .split .sp-text{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:clamp(8px,1.3vh,17px); min-height:0}
+  .split .sp-img{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:.5em; min-height:0}
+  .slide-img{
+    display:block; max-width:100%; border-radius:16px; cursor:zoom-in;
+    border:4px solid #fff; box-shadow:0 8px 22px rgba(150,110,70,.22);
+    transition:transform .12s;
+  }
+  .slide-img:hover{transform:scale(1.02)}
+  .img-cap{font-size:clamp(10px,1.5vh,16px); font-weight:800; color:var(--sub)}
+  .mini-btn{
+    border-radius:999px; padding:.35em 1em; font-weight:800; font-size:clamp(11px,1.6vh,18px);
+    background:var(--theme-soft); color:var(--ink); border:2px solid transparent;
+  }
+  .mini-btn:hover{border-color:var(--theme)}
+  #lightbox{background:rgba(40,25,10,.86); cursor:zoom-out; gap:clamp(10px,2vh,24px)}
+  #lightbox img{max-width:94vw; max-height:82vh; border-radius:18px; border:5px solid #fff; box-shadow:0 20px 60px rgba(0,0,0,.45)}
+  #lightbox .lb-cap{color:#fff; font-family:var(--font-title); font-size:clamp(15px,2.6vh,30px)}
+
   /* 힌트 카드 띠 */
   .bank{
     background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
@@ -297,6 +318,9 @@
 
   /* 힌트 카드 전체화면 */
   #hintOverlay{background:var(--bg); gap:clamp(8px,1.4vh,18px); padding:clamp(10px,2vh,26px) clamp(10px,2vw,30px)}
+  #hintImgWrap{display:flex; flex-direction:column; align-items:center; gap:clamp(8px,1.4vh,18px); flex:1 1 auto; min-height:0}
+  #hintImgWrap img{max-width:96vw; max-height:74vh; border-radius:18px; border:5px solid #fff; box-shadow:var(--shadow)}
+  .hint-tabs{display:flex; gap:8px; justify-content:center}
   .hint-head{text-align:center}
   .hint-head h2{font-family:var(--font-title); font-size:clamp(22px,3.8vh,44px); font-weight:400; letter-spacing:0}
   .hint-head p{font-size:clamp(11px,1.8vh,20px); color:var(--sub); font-weight:700; margin-top:.2em}
@@ -468,16 +492,27 @@
       <!-- 1단계 · 그림책 -->
       <div class="panel" id="p1">
         <div class="box grow">
-          <div class="badge-top">📖 <span id="s1book">내가 너라서 좋아</span></div>
-          <div class="lead" id="s1lead">그림책을 함께 읽어 봅시다</div>
-          <div class="qlist" id="s1qs"></div>
-          <div class="goal" id="s1goal"></div>
+          <div class="split">
+            <div class="sp-text">
+              <div class="badge-top">📖 <span id="s1book">내가 너라서 좋아</span></div>
+              <div class="lead" id="s1lead">그림책을 함께 읽어 봅시다</div>
+              <div class="qlist" id="s1qs"></div>
+              <div class="goal" id="s1goal"></div>
+            </div>
+            <div class="sp-img">
+              <img class="slide-img" src="img/cover.jpg" alt="그림책 「내가 너라서 좋아」 표지"
+                   data-cap="오늘의 그림책 · 내가 너라서 좋아" style="width:clamp(90px,13vw,210px)">
+              <span class="img-cap">오늘의 그림책</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- 2단계 · 활동1 -->
       <div class="panel" id="p2">
         <div class="box grow">
+          <div class="split">
+            <div class="sp-text">
           <div class="badge-top">🪞 활동 1 · 내가 나라서 좋아!</div>
           <div class="lead" id="s2lead">내 안의 보물 찾기</div>
           <div class="frame">
@@ -497,6 +532,13 @@
             </div>
             <div class="cbar"><i id="cBar" style="width:0%"></i></div>
           </div>
+            </div>
+            <div class="sp-img">
+              <img class="slide-img" src="img/worksheet.jpg" alt="활동1 활동지"
+                   data-cap="활동 1 · 내가 나라서 좋아! 활동지" style="width:clamp(96px,14vw,230px)">
+              <button class="mini-btn" data-img="img/carrots.jpg" data-cap="장점마켓에 가져갈 나의 또 다른 장점 네 가지 쓰기">🥕 장점 4칸 보기</button>
+            </div>
+          </div>
         </div>
         <div class="bank">
           <div class="bank-label">장점 힌트</div>
@@ -507,16 +549,25 @@
       <!-- 3단계 · 활동2 -->
       <div class="panel" id="p3">
         <div class="box grow">
-          <div class="round-line">
-            <div class="round-badge" id="roundBadge">거래 1 / 10</div>
-            <div class="dots" id="dots"></div>
-          </div>
-          <div class="lead" style="font-size:clamp(17px,3.4vh,38px)">🥕 당근! 장점 거래하실래요?</div>
-          <div class="qlist" id="s3steps"></div>
-          <div class="thermo">
-            <div class="tlabel">나의<br>장점 온도</div>
-            <div class="tube" id="tube"></div>
-            <div class="tnow" id="tNow">0℃</div>
+          <div class="split">
+            <div class="sp-text">
+              <div class="round-line">
+                <div class="round-badge" id="roundBadge">거래 1 / 10</div>
+                <div class="dots" id="dots"></div>
+              </div>
+              <div class="lead" style="font-size:clamp(17px,3.4vh,38px)">🥕 당근! 장점 거래하실래요?</div>
+              <div class="qlist" id="s3steps"></div>
+              <div class="thermo">
+                <div class="tlabel">나의<br>장점 온도</div>
+                <div class="tube" id="tube"></div>
+                <div class="tnow" id="tNow">0℃</div>
+              </div>
+            </div>
+            <div class="sp-img">
+              <img class="slide-img" src="img/market.jpg" alt="당근 장점 마켓 안내"
+                   data-cap="활동 2 · 당근! 장점 마켓" style="width:clamp(100px,15vw,250px)">
+              <span class="img-cap">눌러서 크게 보기</span>
+            </div>
           </div>
         </div>
         <div class="bank">
@@ -531,11 +582,9 @@
           <div class="badge-top">💌 정리</div>
           <div class="lead" id="s4lead">가족의 거울에 비친 나</div>
           <div class="sublead" id="s4sub">오늘 발견한 나의 장점을 가족에게 편지로 전해 봅시다</div>
-          <div class="mirrors">
-            <div class="mir a"><span class="mi">🪞</span><span class="mt">내가<br>바라본 나</span></div>
-            <div class="mir b"><span class="mi">🌟</span><span class="mt">친구가<br>바라본 나</span></div>
-            <div class="mir c"><span class="mi">🍀</span><span class="mt">가족이<br>바라본 나</span></div>
-          </div>
+          <img class="slide-img" src="img/mirrors.jpg" alt="내가·친구가·가족이 바라본 나"
+               data-cap="내가 바라본 나 · 친구가 바라본 나 · 가족이 바라본 나"
+               style="width:100%; max-height:34vh; object-fit:contain; align-self:center; width:auto">
           <div class="goal" id="s4goal">다양한 모습의 나, <b>모두 소중해!</b><br>있는 그대로 너는 멋져 ♡</div>
         </div>
       </div>
@@ -582,9 +631,20 @@
     <h2>🌟 장점 힌트 카드</h2>
     <p>이 카드는 내 안의 좋은 점을 찾는 데 도움을 주는 힌트예요. 나와 닮은 모습을 찾아보세요!</p>
   </div>
-  <div class="hint-grid" id="hintGrid"></div>
-  <div class="hint-foot">여기에 없는 나만의 장점을 직접 찾아도 좋아요! 세상에 하나뿐인 특별한 나는 더 많은 좋은 점을 가지고 있으니까요 ♡</div>
+  <div class="hint-tabs">
+    <button class="mini-btn" id="hintTabImg">수업 자료 그대로</button>
+    <button class="mini-btn" id="hintTabTxt">글자 크게</button>
+  </div>
+  <div id="hintImgWrap"><img src="img/hintcard.jpg" alt="장점 힌트 카드"></div>
+  <div class="hint-grid" id="hintGrid" hidden></div>
+  <div class="hint-foot" id="hintFoot" hidden>여기에 없는 나만의 장점을 직접 찾아도 좋아요! 세상에 하나뿐인 특별한 나는 더 많은 좋은 점을 가지고 있으니까요 ♡</div>
   <button class="btn" id="hintClose">닫기</button>
+</div>
+
+<!-- 자료 크게 보기 -->
+<div class="overlay" id="lightbox">
+  <img id="lbImg" src="" alt="">
+  <div class="lb-cap" id="lbCap"></div>
 </div>
 
 <!-- 설정 -->
@@ -777,12 +837,17 @@
   }
   function bell(){ tone(880,1.4,.35,"sine",0); tone(1320,1.2,.18,"sine",0.02); tone(660,1.6,.14,"sine",0.04); }
 
-  /* 당근 차임 : 밝은 2음 딩-동 + 반짝 */
+  /* 당근 차임 : 마림바 느낌으로 통통 올라가는 3음 알림 */
+  function mallet(freq, when, vol, dur){
+    tone(freq,        dur,      vol,      "sine",     when);
+    tone(freq*2,      dur*0.45, vol*0.28, "sine",     when);
+    tone(freq*3.01,   dur*0.22, vol*0.10, "triangle", when);
+  }
   function carrotChime(){
-    tone(1174.7,.34,.30,"sine",0);      // D6
-    tone(1567.98,.55,.26,"sine",0.16);  // G6
-    tone(2349.3,.30,.09,"sine",0.20);
-    tone(783.99,.60,.10,"triangle",0.16);
+    mallet(1046.50, 0.00, .30, .34);  // 도
+    mallet(1318.51, 0.13, .30, .34);  // 미
+    mallet(1567.98, 0.26, .34, .70);  // 솔
+    tone(2093.00, .26, .06, "sine", 0.28);
   }
   /* 음성 "당근왔숑!" */
   function speakSignal(){
@@ -1053,6 +1118,34 @@
   $("doneClose").onclick = function(){ doneOverlay.classList.remove("show"); };
   $("hintBtn").onclick   = function(){ hintOverlay.classList.add("show"); };
   $("hintClose").onclick = function(){ hintOverlay.classList.remove("show"); };
+  function hintMode(showImg){
+    $("hintImgWrap").hidden = !showImg;
+    $("hintGrid").hidden = showImg;
+    $("hintFoot").hidden = showImg;
+    $("hintTabImg").style.background = showImg ? "var(--accent)" : "var(--accent-soft)";
+    $("hintTabImg").style.color = showImg ? "#fff" : "";
+    $("hintTabTxt").style.background = showImg ? "var(--accent-soft)" : "var(--accent)";
+    $("hintTabTxt").style.color = showImg ? "" : "#fff";
+  }
+  $("hintTabImg").onclick = function(){ hintMode(true); };
+  $("hintTabTxt").onclick = function(){ hintMode(false); };
+  hintMode(true);
+
+  /* 수업 자료 그림 크게 보기 */
+  var lightbox = $("lightbox");
+  function openImg(src, cap){
+    $("lbImg").src = src; $("lbCap").textContent = cap || "";
+    lightbox.classList.add("show");
+  }
+  lightbox.onclick = function(){ lightbox.classList.remove("show"); };
+  document.addEventListener("click", function(e){
+    var t = e.target;
+    if(t && t.classList && t.classList.contains("slide-img")){
+      openImg(t.getAttribute("src"), t.getAttribute("data-cap"));
+    }else if(t && t.getAttribute && t.getAttribute("data-img")){
+      openImg(t.getAttribute("data-img"), t.getAttribute("data-cap"));
+    }
+  });
   $("fsBtn").onclick = function(){
     if(document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen().catch(function(){});
@@ -1075,6 +1168,7 @@
     else if(e.key === "h" || e.key === "H"){ $("hintBtn").click(); }
     else if(e.key === "f" || e.key === "F"){ $("fsBtn").click(); }
     else if(e.key === "Escape"){
+      lightbox.classList.remove("show");
       hintOverlay.classList.remove("show");
       stepOverlay.classList.remove("show");
       doneOverlay.classList.remove("show");
