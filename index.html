@@ -108,6 +108,14 @@
     display:flex; align-items:center; justify-content:center; position:relative; min-height:0;
   }
   .ring-wrap{position:relative; width:min(100%,38vh); aspect-ratio:1}
+  /* 활동 2 말고는 타이머를 작게 — 내용과 그림이 주인공 */
+  body:not([data-stage="3"]) .timer-card{flex:0 0 clamp(130px,18%,250px)}
+  body:not([data-stage="3"]) .ring-wrap{width:min(100%,24vh)}
+  body:not([data-stage="3"]) .time{font-size:clamp(26px,6.6vh,68px)}
+  body:not([data-stage="3"]) .time-sub{font-size:clamp(10px,1.35vh,16px)}
+  body:not([data-stage="3"]) .time-emoji{font-size:clamp(14px,2.2vh,26px)}
+  body:not([data-stage="3"]) .ring-bg,
+  body:not([data-stage="3"]) .ring-fg{stroke-width:20}
   svg.ring{width:100%; height:100%; transform:rotate(-90deg)}
   svg.ring circle{fill:none; stroke-linecap:round}
   .ring-bg{stroke:#F3E8DA; stroke-width:16}
@@ -133,6 +141,12 @@
     transform:rotate(-1.4deg); box-shadow:0 3px 0 rgba(0,0,0,.05);
   }
   .lead{font-family:var(--font-title); font-size:clamp(20px,4.5vh,52px); font-weight:400; letter-spacing:-.01em; line-height:1.25}
+  body:not([data-stage="3"]) .lead{font-size:clamp(22px,5.2vh,60px)}
+  body:not([data-stage="3"]) .q .qtext{font-size:clamp(17px,3.7vh,44px)}
+  body:not([data-stage="3"]) .goal{font-size:clamp(16px,3.4vh,40px)}
+  body:not([data-stage="3"]) .fr{font-size:clamp(19px,4.4vh,50px)}
+  body:not([data-stage="3"]) .td{font-size:clamp(15px,2.9vh,35px)}
+  body:not([data-stage="3"]) .sublead{font-size:clamp(15px,3vh,35px)}
   .sublead{font-size:clamp(14px,2.7vh,32px); font-weight:700; color:var(--sub); letter-spacing:-.02em}
 
   .qlist{display:flex; flex-direction:column; gap:clamp(7px,1.1vh,15px)}
@@ -228,7 +242,7 @@
   .mir.c{background:var(--teal-soft);   color:#115E59}
 
   /* 수업 자료 그림 */
-  .split{display:flex; gap:clamp(10px,1.3vw,22px); align-items:center; flex:1 1 auto; min-height:0}
+  .split{display:flex; gap:clamp(14px,1.8vw,30px); align-items:center; flex:1 1 auto; min-height:0}
   .split .sp-text{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:clamp(8px,1.3vh,17px); min-height:0}
   .split .sp-img{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:.5em; min-height:0}
   .slide-img{
@@ -311,15 +325,19 @@
     font-size:clamp(17px,3.2vh,40px); font-weight:900;
     background:rgba(255,255,255,.25); border-radius:999px; padding:.25em 1.1em;
   }
-  /* 유튜브 신호음 플레이어 : display:none 이면 유튜브가 재생을 막으므로 항상 렌더하되 숨김 */
+  /* 유튜브 신호음 플레이어
+     · display:none 이면 유튜브가 재생을 막으므로 항상 렌더한다
+     · 기본은 소리만 : 화면 밖으로 밀어내되 크기는 유지(너무 작으면 재생이 막힘) */
   .yt-box{
-    position:fixed; right:14px; bottom:14px; z-index:60;
-    width:clamp(200px,22vw,300px); aspect-ratio:16/9; border-radius:16px; overflow:hidden;
-    border:4px solid rgba(255,255,255,.9); box-shadow:0 10px 30px rgba(0,0,0,.3); background:#000;
-    opacity:0; pointer-events:none; transform:translateY(8px) scale(.96);
-    transition:opacity .25s, transform .25s;
+    position:fixed; z-index:60; width:220px; height:220px; overflow:hidden;
+    right:-9999px; bottom:0; opacity:0; pointer-events:none; background:#000;
   }
-  .yt-box.on{opacity:1; transform:none}
+  body.yt-visible .yt-box{
+    right:14px; bottom:14px; width:clamp(200px,22vw,300px); height:auto; aspect-ratio:16/9;
+    border-radius:16px; border:4px solid rgba(255,255,255,.9); box-shadow:0 10px 30px rgba(0,0,0,.3);
+    opacity:0; transform:translateY(8px) scale(.96); transition:opacity .25s, transform .25s;
+  }
+  body.yt-visible .yt-box.on{opacity:1; transform:none}
   .yt-box iframe{width:100%; height:100%; display:block; border:0}
   #ytPreview{width:clamp(200px,22vw,300px); aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:3px solid var(--line); background:#000; margin-top:.5em}
   #ytPreview iframe{width:100%; height:100%; border:0; display:block}
@@ -409,7 +427,13 @@
     .icon-btn{font-size:clamp(10px,2.7vw,13px); padding:.45em .55em; border-radius:11px}
 
     .main{flex-direction:column; gap:8px}
+    .split{flex-direction:column; gap:10px}
+    .split .sp-img{width:100%}
+    .split .sp-img .slide-img{width:auto !important; max-width:74% !important; max-height:30vh !important; margin:0 auto}
     .timer-card{flex:0 0 auto; padding:9px 0}
+    body:not([data-stage="3"]) .timer-card{flex:0 0 auto}
+    body:not([data-stage="3"]) .ring-wrap{width:min(38vw,17vh)}
+    body:not([data-stage="3"]) .time{font-size:clamp(24px,8vw,44px)}
     .ring-wrap{width:min(52vw,25vh)}
     .time{font-size:clamp(36px,13vw,72px)}
     .time-sub{font-size:clamp(10px,2.8vw,14px)}
@@ -514,7 +538,8 @@
             </div>
             <div class="sp-img">
               <img class="slide-img" src="img/cover.jpg" alt="그림책 「내가 너라서 좋아」 표지"
-                   data-cap="오늘의 그림책 · 내가 너라서 좋아" style="width:clamp(90px,13vw,210px)">
+                   data-cap="오늘의 그림책 · 내가 너라서 좋아"
+                   style="width:clamp(150px,24vw,380px); max-height:47vh; object-fit:contain">
               <span class="img-cap">오늘의 그림책</span>
             </div>
           </div>
@@ -548,7 +573,8 @@
             </div>
             <div class="sp-img">
               <img class="slide-img" src="img/worksheet.jpg" alt="활동1 활동지"
-                   data-cap="활동 1 · 내가 나라서 좋아! 활동지" style="width:clamp(96px,14vw,230px)">
+                   data-cap="활동 1 · 내가 나라서 좋아! 활동지"
+                   style="width:clamp(150px,23vw,340px); max-height:50vh; object-fit:contain">
               <button class="mini-btn" data-img="img/carrots.jpg" data-cap="장점마켓에 가져갈 나의 또 다른 장점 네 가지 쓰기">🥕 장점 4칸 보기</button>
             </div>
           </div>
@@ -597,7 +623,7 @@
           <div class="sublead" id="s4sub">오늘 발견한 나의 장점을 가족에게 편지로 전해 봅시다</div>
           <img class="slide-img" src="img/mirrors.jpg" alt="내가·친구가·가족이 바라본 나"
                data-cap="내가 바라본 나 · 친구가 바라본 나 · 가족이 바라본 나"
-               style="width:100%; max-height:34vh; object-fit:contain; align-self:center; width:auto">
+               style="flex:1 1 auto; min-height:0; max-width:100%; object-fit:contain; align-self:center; width:auto">
           <div class="goal" id="s4goal">다양한 모습의 나, <b>모두 소중해!</b><br>있는 그대로 너는 멋져 ♡</div>
         </div>
       </div>
@@ -721,6 +747,10 @@
         <div><label for="cYtDur">재생 길이(초)</label><input type="number" id="cYtDur" min="1" max="30" value="4"></div>
       </div>
     </div>
+    <div class="row switch">
+      <input type="checkbox" id="cYtShow">
+      <label for="cYtShow" style="margin:0">신호가 울릴 때 영상 화면도 보여 주기 <span style="font-weight:600;color:var(--sub)">(꺼두면 소리만 납니다)</span></label>
+    </div>
     <div class="row">
       <label>영상에서 쓸 부분 찾기 <span style="font-weight:600;color:var(--sub)">(들어보며 「시작 시간」을 맞추세요)</span></label>
       <div id="ytPreview"></div>
@@ -789,7 +819,7 @@
 
   var DEFAULTS = {
     sound:true, signal:"youtube", signalText:"당근왔숑!", customSound:"",
-    yt:{ id:"FtGC_nRpbTk", start:0, dur:4 },
+    yt:{ id:"FtGC_nRpbTk", start:0, dur:4, show:false },
     hints:JSON.parse(JSON.stringify(HINT_DEFAULT)),
     s1:{ sec:600, book:"내가 너라서 좋아", lead:"그림책을 함께 읽어 봅시다",
          qs:["거울 속의 내가 주인공에게 해준 말 중 가장 기억에 남는 말은 무엇인가요?",
@@ -927,6 +957,7 @@
   function playYT(){
     if(ytBroken || !ytReady || !ytPlayer) return false;
     try{
+      document.body.classList.toggle("yt-visible", !!cfg.yt.show);
       $("ytWrap").classList.add("on");
       ytPlayer.unMute(); ytPlayer.setVolume(100);
       ytPlayer.seekTo(Number(cfg.yt.start) || 0, true);
@@ -934,7 +965,14 @@
       clearTimeout(ytStopTimer);
       ytStopTimer = setTimeout(function(){
         try{ ytPlayer.pauseVideo(); }catch(e){}
+        $("ytWrap").classList.remove("on");
       }, Math.max(1, Number(cfg.yt.dur) || 4) * 1000);
+      // 화면에 안 보이므로, 실제로 재생됐는지 확인해서 아니면 차임으로 대체
+      setTimeout(function(){
+        var st = -99;
+        try{ st = ytPlayer.getPlayerState(); }catch(e){}
+        if(st !== 1 && st !== 3){ carrotChime(); }   // 1=재생중, 3=버퍼링
+      }, 700);
       return true;
     }catch(e){ return false; }
   }
@@ -1285,6 +1323,7 @@
     $("cYtId").value = cfg.yt.id;
     $("cYtStart").value = cfg.yt.start;
     $("cYtDur").value = cfg.yt.dur;
+    $("cYtShow").checked = !!cfg.yt.show;
     $("ytInfo").textContent = ytBroken
       ? "유튜브를 불러오지 못했습니다. 학교 인터넷이 막았을 수 있어요 — 다른 신호음을 고르세요."
       : (ytReady ? "영상 준비됨 ✓" : "영상 불러오는 중…");
@@ -1316,6 +1355,7 @@
     cfg.yt.id    = ytVideoId($("cYtId").value) || cfg.yt.id;
     cfg.yt.start = num("cYtStart", 0, 3600, 0);
     cfg.yt.dur   = num("cYtDur", 1, 30, 4);
+    cfg.yt.show  = $("cYtShow").checked;
     signal();
     if(cfg.signal === "youtube"){
       setTimeout(function(){ $("ytWrap").classList.remove("on"); },
@@ -1381,6 +1421,7 @@
     cfg.yt.id    = newId;
     cfg.yt.start = num("cYtStart", 0, 3600, 0);
     cfg.yt.dur   = num("cYtDur", 1, 30, 4);
+    cfg.yt.show  = $("cYtShow").checked;
     if(idChanged && ytPlayer && ytPlayer.loadVideoById){
       try{ ytPlayer.cueVideoById(newId); ytBroken = false; }catch(e){}
     }
