@@ -32,11 +32,16 @@
   html,body{height:100%; height:100dvh}
   body{
     color:var(--ink);
+    /* 수업 자료 대문의 파스텔 그라데이션 */
     background:
-      repeating-linear-gradient(0deg,  rgba(150,120,90,.045) 0 1px, transparent 1px 28px),
-      repeating-linear-gradient(90deg, rgba(150,120,90,.045) 0 1px, transparent 1px 28px),
-      radial-gradient(130% 90% at 50% -15%, #FFFDF8 0%, transparent 62%),
-      var(--bg);
+      repeating-linear-gradient(0deg,  rgba(150,120,90,.04) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, rgba(150,120,90,.04) 0 1px, transparent 1px 28px),
+      radial-gradient(60% 55% at 100% 0%,   rgba(161,194,229,.50), transparent 62%),
+      radial-gradient(55% 55% at 100% 100%, rgba(205,232,175,.45), transparent 62%),
+      radial-gradient(50% 60% at 100% 55%,  rgba(183,229,219,.45), transparent 62%),
+      radial-gradient(60% 70% at 0% 40%,    rgba(255,235,212,.55), transparent 66%),
+      radial-gradient(50% 50% at 20% 100%,  rgba(252,225,232,.45), transparent 65%),
+      #FDFBF6;
     font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
     overflow:hidden; user-select:none;
   }
@@ -343,8 +348,15 @@
   #ytPreview iframe{width:100%; height:100%; border:0; display:block}
   #doneOverlay{background:linear-gradient(160deg,#14B8A6,#5EEAD4)}
   #doneOverlay *{color:#fff}
-  #stepOverlay{background:linear-gradient(160deg,#8B5CF6,#A78BFA)}
-  #stepOverlay *{color:#fff}
+  #stepOverlay, #introOverlay{background:rgba(38,26,14,.84); gap:clamp(12px,2.4vh,30px)}
+  .slide-shot{
+    max-width:92vw; max-height:74vh; border-radius:20px; border:6px solid #fff;
+    box-shadow:0 24px 70px rgba(0,0,0,.45); display:block;
+  }
+  .slide-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:center}
+  .slide-dots{display:flex; gap:7px; justify-content:center}
+  .slide-dots i{width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.4); display:block}
+  .slide-dots i.on{background:#fff}
 
   /* 힌트 카드 전체화면 */
   #hintOverlay{background:var(--bg); gap:clamp(8px,1.4vh,18px); padding:clamp(10px,2vh,26px) clamp(10px,2vw,30px)}
@@ -504,6 +516,7 @@
       <button class="step" data-go="4"><span class="no">4</span><span class="stitle">정리 · 가족의 거울</span></button>
     </div>
     <div class="tools">
+      <button class="icon-btn" id="introBtn">표지</button>
       <button class="icon-btn" id="hintBtn">힌트 카드</button>
       <button class="icon-btn" id="fsBtn">전체화면</button>
       <button class="icon-btn" id="setupBtn">설정</button>
@@ -639,12 +652,20 @@
   </div>
 </div>
 
-<!-- 단계 전환 -->
+<!-- 수업 대문 -->
+<div class="overlay show" id="introOverlay">
+  <img class="slide-shot" src="img/intro.jpg" alt="반짝반짝 나를 발견하는 시간">
+  <button class="btn primary" id="introStart">수업 시작하기 →</button>
+</div>
+
+<!-- 단계 전환 : 수업 자료 슬라이드 -->
 <div class="overlay" id="stepOverlay">
-  <div class="move-bell" id="stepIcon">📖</div>
-  <div class="move-title" id="stepTitle">1단계</div>
-  <div class="move-sub" id="stepSub">그림책 읽기</div>
-  <button class="btn" id="stepClose" style="margin-top:2vh">시작하기</button>
+  <img class="slide-shot" id="stepImg" src="" alt="수업 자료">
+  <div class="slide-dots" id="stepDots"></div>
+  <div class="slide-actions">
+    <button class="btn ghost" id="stepSkip">건너뛰기</button>
+    <button class="btn primary" id="stepNext">다음 →</button>
+  </div>
 </div>
 
 <!-- 체인지! -->
@@ -1193,12 +1214,33 @@
   }
 
   /* ---------- 단계 이동 ---------- */
-  var STEP_INFO = {
-    1:{icon:"📖", title:"1단계", sub:"그림책 · 내가 너라서 좋아"},
-    2:{icon:"🪞", title:"활동 1", sub:"내가 나라서 좋아! · 내 안의 보물 찾기"},
-    3:{icon:"🥕", title:"활동 2", sub:"당근! 장점 거래하실래요?"},
-    4:{icon:"💌", title:"정리",   sub:"가족의 거울에 비친 나"}
+  /* 단계로 넘어가기 전에 보여줄 수업 자료 슬라이드 */
+  var STEP_SLIDES = {
+    1:[],
+    2:["img/activities.jpg", "img/act1.jpg"],
+    3:["img/act2.jpg"],
+    4:["img/wrapup.jpg"]
   };
+  var slideQueue = [], slideIdx = 0;
+  function renderSlide(){
+    $("stepImg").src = slideQueue[slideIdx];
+    $("stepNext").textContent = (slideIdx >= slideQueue.length - 1) ? "시작하기 →" : "다음 →";
+    var d = "";
+    for(var i=0; i<slideQueue.length; i++){ d += '<i class="'+(i===slideIdx?"on":"")+'"></i>'; }
+    $("stepDots").innerHTML = slideQueue.length > 1 ? d : "";
+  }
+  function showSlides(n){
+    slideQueue = (STEP_SLIDES[n] || []).slice();
+    slideIdx = 0;
+    if(!slideQueue.length){ play(); return; }
+    renderSlide();
+    stepOverlay.classList.add("show");
+    ding();
+  }
+  function closeSlides(startTimer){
+    stepOverlay.classList.remove("show");
+    if(startTimer) play();
+  }
   function gotoStage(n, announce){
     if(n < 1 || n > 4) return;
     stopLoop(); clearInterval(moveTimer);
@@ -1208,14 +1250,7 @@
     if(n === 3) round = 1;
     resetTimer();
     render();
-    if(announce){
-      var s = STEP_INFO[n];
-      $("stepIcon").textContent = s.icon;
-      $("stepTitle").textContent = s.title;
-      $("stepSub").textContent = s.sub;
-      stepOverlay.classList.add("show");
-      ding();
-    }
+    if(announce) showSlides(n);
   }
 
   /* ---------- 버튼 ---------- */
@@ -1236,7 +1271,16 @@
     keepAwake(false); resetTimer(); render();
   };
   stepBtn.onclick  = function(){ gotoStage(stage + 1, true); };
-  $("stepClose").onclick = function(){ stepOverlay.classList.remove("show"); play(); };
+  $("stepNext").onclick = function(){
+    if(slideIdx < slideQueue.length - 1){ slideIdx++; renderSlide(); return; }
+    closeSlides(true);
+  };
+  $("stepSkip").onclick = function(){ closeSlides(false); };
+  $("introStart").onclick = function(){
+    audio();                                   // 첫 클릭으로 소리·영상 재생 권한 확보
+    $("introOverlay").classList.remove("show");
+  };
+  $("introBtn").onclick = function(){ if(T.run) pause(); $("introOverlay").classList.add("show"); };
   $("doneClose").onclick = function(){ doneOverlay.classList.remove("show"); };
   $("hintBtn").onclick   = function(){ hintOverlay.classList.add("show"); };
   $("hintClose").onclick = function(){ hintOverlay.classList.remove("show"); };
@@ -1282,6 +1326,18 @@
 
   document.addEventListener("keydown", function(e){
     if(setup.classList.contains("show")) return;
+    if($("introOverlay").classList.contains("show")){
+      if(e.code === "Space" || e.code === "Enter" || e.code === "ArrowRight"){
+        e.preventDefault(); $("introStart").click();
+      }
+      return;
+    }
+    if(stepOverlay.classList.contains("show")){
+      if(e.code === "Space" || e.code === "Enter" || e.code === "ArrowRight"){
+        e.preventDefault(); $("stepNext").click();
+      }
+      return;
+    }
     if(e.code === "Space"){ e.preventDefault(); toggle(); }
     else if(e.code === "ArrowRight"){ e.preventDefault(); if(stage===3) nextBtn.click(); else stepBtn.click(); }
     else if(e.code === "ArrowLeft"){ e.preventDefault(); gotoStage(stage - 1, false); }
@@ -1294,6 +1350,7 @@
       hintOverlay.classList.remove("show");
       stepOverlay.classList.remove("show");
       doneOverlay.classList.remove("show");
+      $("introOverlay").classList.remove("show");
     }
   });
 
