@@ -3,49 +3,86 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F97316">
+<meta name="theme-color" content="#EC4899">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>장점 칭찬 수업 도우미</title>
+<title>반짝반짝 나를 발견하는 시간</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌟</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#FFF7ED; --card:#FFFFFF; --ink:#1F2937; --sub:#6B7280;
     --line:#F0E3D2;
     --accent:#F97316; --accent-soft:#FFEDD5;
-    --blue:#0EA5E9; --blue-soft:#E0F2FE;
+    --blue:#0EA5E9;   --blue-soft:#E0F2FE;
     --violet:#8B5CF6; --violet-soft:#EDE9FE;
-    --green:#10B981; --green-soft:#DCFCE7; --red:#EF4444;
+    --pink:#EC4899;   --pink-soft:#FCE7F3;
+    --teal:#14B8A6;   --teal-soft:#CCFBF1;
+    --green:#10B981;  --green-soft:#DCFCE7;
+    --red:#EF4444;
     --shadow:0 10px 30px rgba(180,120,60,.13);
-    --r:22px;
+    --r:24px;
+    --font-title:"Jua","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    --font-hand:"Gaegu","Apple SD Gothic Neo","Malgun Gothic",cursive;
     color-scheme:light;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent}
   html,body{height:100%; height:100dvh}
   body{
-    background:var(--bg); color:var(--ink);
+    color:var(--ink);
+    background:
+      repeating-linear-gradient(0deg,  rgba(150,120,90,.045) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, rgba(150,120,90,.045) 0 1px, transparent 1px 28px),
+      radial-gradient(130% 90% at 50% -15%, #FFFDF8 0%, transparent 62%),
+      var(--bg);
     font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
     overflow:hidden; user-select:none;
   }
+  /* 찢어진 색종이 띠 */
+  .torn{
+    position:fixed; left:0; right:0; z-index:4; pointer-events:none;
+    height:clamp(11px,1.8vh,20px); background:var(--theme-soft);
+    -webkit-mask-image:radial-gradient(circle at 11px 0, transparent 10px, #000 10.5px);
+            mask-image:radial-gradient(circle at 11px 0, transparent 10px, #000 10.5px);
+    -webkit-mask-size:22px 100%; mask-size:22px 100%;
+    -webkit-mask-repeat:repeat-x; mask-repeat:repeat-x;
+    transition:background .35s;
+  }
+  .torn.t{top:0; transform:scaleY(-1)}
+  .torn.b{bottom:0}
+  /* 배경 장식 */
+  .deco{
+    position:fixed; z-index:1; pointer-events:none; user-select:none;
+    font-size:clamp(18px,3vh,38px); opacity:.42; filter:saturate(.9);
+  }
+  .deco.d1{left:1.2vw;  top:16vh;    transform:rotate(-12deg)}
+  .deco.d2{right:1.2vw; top:30vh;    transform:rotate(14deg)}
+  .deco.d3{left:2vw;    bottom:13vh; transform:rotate(9deg)}
+  .deco.d4{right:2vw;   bottom:19vh; transform:rotate(-8deg)}
   button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit}
 
-  /* 단계별 테마색 */
   body[data-stage="1"]{--theme:var(--violet); --theme-soft:var(--violet-soft)}
-  body[data-stage="2"]{--theme:var(--green);  --theme-soft:var(--green-soft)}
+  body[data-stage="2"]{--theme:var(--pink);   --theme-soft:var(--pink-soft)}
   body[data-stage="3"]{--theme:var(--accent); --theme-soft:var(--accent-soft)}
+  body[data-stage="4"]{--theme:var(--teal);   --theme-soft:var(--teal-soft)}
 
   /* ---------- 레이아웃 ---------- */
-  #app{height:100%; display:flex; flex-direction:column; padding:clamp(10px,1.6vh,20px) clamp(14px,2vw,34px); gap:clamp(8px,1.2vh,14px)}
+  #app{
+    position:relative; z-index:2; height:100%; display:flex; flex-direction:column;
+    padding:clamp(17px,2.9vh,32px) clamp(13px,1.9vw,32px);
+    gap:clamp(8px,1.1vh,13px);
+  }
 
-  /* 상단 : 단계 띠 */
-  .top{display:flex; align-items:center; gap:clamp(8px,1vw,16px); flex:0 0 auto}
-  .steps{display:flex; gap:clamp(6px,.8vw,12px); flex:1 1 auto; min-width:0}
+  .top{display:flex; align-items:center; gap:clamp(7px,.9vw,14px); flex:0 0 auto}
+  .steps{display:flex; gap:clamp(5px,.7vw,10px); flex:1 1 auto; min-width:0}
   .step{
-    flex:1 1 0; min-width:0; display:flex; align-items:center; gap:.5em; justify-content:center;
-    background:var(--card); border:2px solid var(--line); border-radius:16px;
-    padding:clamp(7px,1.1vh,13px) clamp(6px,.8vw,14px);
-    font-size:clamp(12px,1.9vh,22px); font-weight:800; color:var(--sub);
-    letter-spacing:-.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    transition:transform .1s;
+    font-family:var(--font-title);
+    flex:1 1 0; min-width:0; display:flex; align-items:center; gap:.45em; justify-content:center;
+    background:var(--card); border:2px solid var(--line); border-radius:15px;
+    padding:clamp(6px,1vh,12px) clamp(5px,.7vw,12px);
+    font-size:clamp(11px,1.75vh,20px); font-weight:800; color:var(--sub);
+    letter-spacing:-.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:transform .1s;
   }
   .step:active{transform:translateY(2px)}
   .step .no{
@@ -59,261 +96,354 @@
   .step.past .no{background:var(--theme)}
   .top .tools{display:flex; gap:6px; flex:0 0 auto}
   .icon-btn{
-    background:var(--card); border:2px solid var(--line); border-radius:14px;
-    padding:.45em .8em; font-size:clamp(12px,1.6vh,19px); font-weight:700; color:var(--sub);
+    background:var(--card); border:2px solid var(--line); border-radius:13px;
+    padding:.45em .75em; font-size:clamp(11px,1.55vh,18px); font-weight:700; color:var(--sub); white-space:nowrap;
   }
   .icon-btn:hover{border-color:var(--theme); color:var(--theme)}
 
-  /* 본문 */
-  .main{flex:1 1 auto; display:flex; gap:clamp(12px,1.6vw,26px); min-height:0}
+  .main{flex:1 1 auto; display:flex; gap:clamp(11px,1.5vw,24px); min-height:0}
   .timer-card{
-    flex:0 0 38%; background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
+    flex:0 0 36%; background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
     display:flex; align-items:center; justify-content:center; position:relative; min-height:0;
   }
-  .ring-wrap{position:relative; width:min(100%,40vh); aspect-ratio:1}
+  .ring-wrap{position:relative; width:min(100%,38vh); aspect-ratio:1}
   svg.ring{width:100%; height:100%; transform:rotate(-90deg)}
   svg.ring circle{fill:none; stroke-linecap:round}
   .ring-bg{stroke:#F3E8DA; stroke-width:16}
   .ring-fg{stroke:var(--theme); stroke-width:16; transition:stroke .4s}
   .time-text{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1em}
-  .time{font-size:clamp(44px,12vh,130px); font-weight:800; letter-spacing:-.04em; font-variant-numeric:tabular-nums; line-height:1}
-  .time-sub{font-size:clamp(12px,1.9vh,23px); color:var(--sub); font-weight:700; text-align:center; padding:0 1em}
+  .time-emoji{font-size:clamp(20px,3.4vh,40px); line-height:1; margin-bottom:.05em}
+  .time{font-family:var(--font-title); font-size:clamp(42px,11.5vh,124px); font-weight:400; letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:1}
+  .time-sub{font-size:clamp(12px,1.8vh,22px); color:var(--sub); font-weight:700; text-align:center; padding:0 1em}
   body.warn .ring-fg{stroke:var(--red)}
   body.warn .time{color:var(--red); animation:pulse .9s ease-in-out infinite}
   @keyframes pulse{50%{opacity:.45}}
 
-  .right{flex:1 1 auto; display:flex; flex-direction:column; gap:clamp(10px,1.3vh,16px); min-width:0; min-height:0}
-  .panel{display:none; flex-direction:column; gap:clamp(10px,1.3vh,16px); flex:1 1 auto; min-height:0}
+  .right{flex:1 1 auto; display:flex; flex-direction:column; gap:clamp(9px,1.2vh,15px); min-width:0; min-height:0}
+  .panel{display:none; flex-direction:column; gap:clamp(9px,1.2vh,15px); flex:1 1 auto; min-height:0}
   .panel.on{display:flex}
-  .box{
-    background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
-    padding:clamp(14px,2.2vh,30px) clamp(16px,2vw,32px);
-  }
-  .box.grow{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:clamp(9px,1.4vh,18px); overflow:auto}
+  .box{background:var(--card); border-radius:var(--r); box-shadow:var(--shadow); padding:clamp(13px,2vh,28px) clamp(15px,1.9vw,30px)}
+  .box.grow{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:clamp(8px,1.3vh,17px); overflow:auto}
 
-  .lead{font-size:clamp(20px,4.6vh,54px); font-weight:800; letter-spacing:-.03em; line-height:1.25}
-  .book{
-    display:inline-flex; align-items:center; gap:.5em; align-self:flex-start;
-    background:var(--theme-soft); color:var(--ink); border-radius:14px;
-    padding:.35em .9em; font-size:clamp(14px,2.2vh,26px); font-weight:800;
+  .badge-top{
+    font-family:var(--font-title); display:inline-flex; align-items:center; gap:.5em; align-self:flex-start;
+    background:var(--theme-soft); color:var(--ink); border-radius:13px;
+    padding:.34em .95em; font-size:clamp(13px,2.4vh,29px); font-weight:400;
+    transform:rotate(-1.4deg); box-shadow:0 3px 0 rgba(0,0,0,.05);
   }
-  .qlist{display:flex; flex-direction:column; gap:clamp(8px,1.2vh,16px)}
-  .q{display:flex; align-items:flex-start; gap:clamp(9px,1.1vw,16px)}
+  .lead{font-family:var(--font-title); font-size:clamp(20px,4.5vh,52px); font-weight:400; letter-spacing:-.01em; line-height:1.25}
+  .sublead{font-size:clamp(14px,2.7vh,32px); font-weight:700; color:var(--sub); letter-spacing:-.02em}
+
+  .qlist{display:flex; flex-direction:column; gap:clamp(7px,1.1vh,15px)}
+  .q{display:flex; align-items:flex-start; gap:clamp(8px,1vw,15px)}
   .q .qno{
     flex:0 0 auto; width:1.9em; height:1.9em; border-radius:50%; background:var(--theme); color:#fff;
     display:flex; align-items:center; justify-content:center; font-weight:900;
-    font-size:clamp(14px,2.2vh,26px); margin-top:.1em;
+    font-size:clamp(13px,2.4vh,29px); margin-top:.1em;
   }
-  .q .qtext{font-size:clamp(17px,3.2vh,38px); font-weight:700; line-height:1.3; letter-spacing:-.02em}
+  .q .qtext{font-size:clamp(16px,3.4vh,40px); font-weight:700; line-height:1.35; letter-spacing:-.02em}
 
-  .line{display:flex; align-items:flex-start; gap:clamp(10px,1.2vw,18px)}
-  .line .tag{margin-top:.28em}
-  .tag{flex:0 0 auto; border-radius:12px; padding:.3em .8em; font-weight:800; font-size:clamp(13px,1.9vh,25px); white-space:nowrap}
-  .tag.ask{background:var(--blue-soft); color:#0369A1}
-  .tag.praise{background:var(--accent-soft); color:#C2410C}
-  .say{font-size:clamp(20px,5vh,62px); font-weight:800; letter-spacing:-.03em; line-height:1.25}
-  .say .blank{color:var(--accent)}
-  .note{text-align:center; color:var(--sub); font-weight:700; font-size:clamp(12px,1.8vh,21px)}
+  .goal{
+    background:var(--theme-soft); border:3px dashed rgba(255,255,255,.9); border-radius:18px;
+    padding:clamp(10px,1.6vh,20px) clamp(12px,1.5vw,24px);
+    text-align:center; font-size:clamp(15px,3.1vh,37px); font-weight:800; line-height:1.4; letter-spacing:-.02em;
+  }
+  .goal b{font-family:var(--font-title); font-weight:400; color:var(--theme)}
 
-  /* 라운드 점 */
-  .dots{display:flex; gap:clamp(5px,.6vw,9px); flex-wrap:wrap; align-items:center; justify-content:center}
-  .dot{width:clamp(9px,1.4vh,17px); height:clamp(9px,1.4vh,17px); border-radius:50%; background:#EADBC8}
-  .dot.done{background:var(--accent)}
-  .dot.now{background:var(--blue); box-shadow:0 0 0 clamp(3px,.5vh,6px) var(--blue-soft)}
-  .round-line{display:flex; align-items:center; gap:clamp(10px,1.2vw,18px)}
-  .round-badge{
-    background:var(--accent); color:#fff; border-radius:999px; flex:0 0 auto;
-    padding:.3em 1em; font-size:clamp(14px,2.2vh,28px); font-weight:800; letter-spacing:-.02em; white-space:nowrap;
+  /* 문장 틀 */
+  .frame{display:flex; flex-direction:column; gap:clamp(6px,1vh,13px)}
+  .fr{font-family:var(--font-title); display:flex; align-items:center; flex-wrap:wrap; gap:.35em; font-size:clamp(18px,4vh,46px); font-weight:400; letter-spacing:0}
+  .fr .blank{
+    display:inline-block; min-width:clamp(120px,17vw,320px); border-bottom:4px dashed var(--theme);
+    height:1.15em; border-radius:4px; background:var(--theme-soft);
+  }
+  .fr small{font-size:.62em; color:var(--sub); font-weight:800}
+
+  .todo{display:flex; flex-direction:column; gap:clamp(6px,.9vh,12px)}
+  .td{display:flex; align-items:flex-start; gap:.6em; font-size:clamp(14px,2.7vh,32px); font-weight:700; line-height:1.35}
+  .td .tno{
+    flex:0 0 auto; width:1.7em; height:1.7em; border-radius:8px; background:var(--theme-soft); color:var(--theme);
+    display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9em; margin-top:.05em;
   }
 
   /* 완료 카운터 */
-  .counter{display:flex; align-items:center; justify-content:center; gap:clamp(10px,1.6vw,24px)}
+  .counter{display:flex; align-items:center; justify-content:center; gap:clamp(9px,1.4vw,20px)}
   .counter .cbtn{
-    width:clamp(46px,7vh,76px); height:clamp(46px,7vh,76px); border-radius:50%;
-    background:var(--theme-soft); color:#166534; font-size:clamp(24px,4vh,42px); font-weight:900;
+    width:clamp(42px,6.2vh,68px); height:clamp(42px,6.2vh,68px); border-radius:50%;
+    background:var(--theme-soft); color:var(--theme); font-size:clamp(22px,3.6vh,38px); font-weight:900;
     display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow);
   }
   .counter .cbtn:active{transform:translateY(2px)}
-  .cnum{font-size:clamp(30px,6vh,68px); font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:-.03em}
+  .cnum{font-size:clamp(27px,5.4vh,60px); font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:-.03em}
   .cnum .tot{color:var(--sub); font-size:.5em; font-weight:800}
-  .cbar{height:clamp(8px,1.2vh,14px); border-radius:999px; background:var(--line); overflow:hidden; margin-top:.7em}
-  .cbar i{display:block; height:100%; background:var(--green); border-radius:999px; transition:width .3s}
-  .clabel{text-align:center; color:var(--sub); font-weight:800; font-size:clamp(12px,1.8vh,20px); margin-bottom:.5em}
+  .cbar{height:clamp(7px,1.1vh,13px); border-radius:999px; background:var(--line); overflow:hidden; margin-top:.6em}
+  .cbar i{display:block; height:100%; background:var(--theme); border-radius:999px; transition:width .3s}
+  .clabel{text-align:center; color:var(--sub); font-weight:800; font-size:clamp(11px,1.7vh,19px); margin-bottom:.35em}
 
-  /* 낱말 띠 */
+  /* 라운드 */
+  .round-line{display:flex; align-items:center; gap:clamp(9px,1.1vw,16px); flex-wrap:wrap}
+  .round-badge{
+    font-family:var(--font-title); background:var(--accent); color:#fff; border-radius:999px; flex:0 0 auto;
+    padding:.3em 1em; font-size:clamp(13px,2.2vh,27px); font-weight:400; letter-spacing:0; white-space:nowrap;
+    box-shadow:0 4px 0 rgba(194,65,12,.35);
+  }
+  .dots{display:flex; gap:clamp(4px,.55vw,8px); flex-wrap:wrap; align-items:center}
+  .dot{width:clamp(8px,1.3vh,16px); height:clamp(8px,1.3vh,16px); border-radius:50%; background:#EADBC8}
+  .dot.done{background:var(--accent)}
+  .dot.now{background:var(--blue); box-shadow:0 0 0 clamp(3px,.45vh,6px) var(--blue-soft)}
+
+  /* 장점 온도계 */
+  .thermo{display:flex; align-items:center; gap:clamp(9px,1.2vw,18px)}
+  .thermo .tlabel{
+    flex:0 0 auto; text-align:center; font-weight:900; color:var(--accent);
+    font-size:clamp(11px,1.7vh,19px); line-height:1.25;
+  }
+  .tube{
+    flex:1 1 auto; min-width:0; display:flex; gap:clamp(2px,.35vw,5px);
+    background:var(--accent-soft); border-radius:999px; padding:clamp(3px,.5vh,6px);
+  }
+  .tube span{
+    flex:1 1 0; height:clamp(16px,2.6vh,32px); border-radius:999px; background:#fff;
+    transition:background .35s;
+  }
+  .tube span.fill{background:linear-gradient(180deg,#FB923C,#EF4444)}
+  .tnow{
+    flex:0 0 auto; font-family:var(--font-title); font-size:clamp(22px,4vh,48px); font-weight:400; color:var(--red);
+    font-variant-numeric:tabular-nums; letter-spacing:-.03em; white-space:nowrap;
+  }
+
+  /* 세 거울 */
+  .mirrors{display:flex; gap:clamp(8px,1.1vw,18px)}
+  .mir{
+    flex:1 1 0; min-width:0; text-align:center; border-radius:20px;
+    padding:clamp(10px,1.7vh,22px) clamp(6px,.8vw,14px);
+    border:3px dashed rgba(255,255,255,.95);
+    font-family:var(--font-title); font-weight:400; letter-spacing:0; line-height:1.35;
+  }
+  .mir .mi{font-size:clamp(24px,5vh,58px); display:block; margin-bottom:.15em}
+  .mir .mt{font-size:clamp(13px,2.6vh,31px)}
+  .mir.a{background:var(--pink-soft);   color:#9D174D}
+  .mir.b{background:#FEF3C7;            color:#92400E}
+  .mir.c{background:var(--teal-soft);   color:#115E59}
+
+  /* 힌트 카드 띠 */
   .bank{
     background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
-    flex:0 0 auto; overflow:hidden; display:flex; align-items:center; padding:clamp(8px,1.2vh,15px) 0;
+    flex:0 0 auto; overflow:hidden; display:flex; align-items:center; padding:clamp(7px,1.1vh,14px) 0;
   }
   .bank-label{
     flex:0 0 auto; display:flex; align-items:center; align-self:stretch;
-    padding:0 clamp(10px,1vw,18px); border-right:2px solid var(--line); margin-right:clamp(6px,.8vw,12px);
-    font-size:clamp(11px,1.6vh,19px); font-weight:800; color:var(--sub); white-space:nowrap;
+    padding:0 clamp(9px,.9vw,16px); border-right:2px solid var(--line); margin-right:clamp(6px,.7vw,11px);
+    font-size:clamp(10px,1.5vh,18px); font-weight:800; color:var(--sub); white-space:nowrap;
   }
   .bank-track{
     flex:1 1 auto; overflow:hidden; min-width:0;
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);
     mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);
   }
-  .marquee{display:flex; width:max-content; animation:scroll 46s linear infinite}
+  .marquee{display:flex; width:max-content; animation:scroll 60s linear infinite}
   .marquee:hover{animation-play-state:paused}
   @keyframes scroll{from{transform:translateX(0)} to{transform:translateX(-50%)}}
   .word{
-    margin:0 clamp(6px,.7vw,12px); padding:.32em 1em; border-radius:999px;
-    background:var(--accent-soft); color:#9A3412; font-weight:700;
-    font-size:clamp(14px,2.2vh,29px); white-space:nowrap;
+    margin:0 clamp(5px,.6vw,11px); padding:.3em .95em; border-radius:999px;
+    font-weight:700; font-size:clamp(13px,2.1vh,27px); white-space:nowrap;
   }
-  .word:nth-child(3n){background:var(--blue-soft); color:#0369A1}
-  .word:nth-child(3n+1){background:#DCFCE7; color:#15803D}
+  .w-study {background:var(--pink-soft);   color:#9D174D}
+  .w-mind  {background:var(--green-soft);  color:#15803D}
+  .w-friend{background:var(--blue-soft);   color:#0369A1}
+  .w-life  {background:var(--violet-soft); color:#5B21B6}
 
   /* 하단 컨트롤 */
-  .controls{flex:0 0 auto; display:flex; gap:clamp(8px,1vw,14px); justify-content:center; flex-wrap:wrap}
+  .controls{flex:0 0 auto; display:flex; gap:clamp(7px,.9vw,13px); justify-content:center; flex-wrap:wrap}
   .btn{
-    border-radius:16px; padding:clamp(10px,1.5vh,17px) clamp(16px,2vw,32px);
-    font-size:clamp(14px,2.1vh,26px); font-weight:800; letter-spacing:-.02em;
-    background:var(--card); border:2px solid var(--line); color:var(--ink); box-shadow:var(--shadow);
-    transition:transform .08s;
+    font-family:var(--font-title);
+    border-radius:17px; padding:clamp(9px,1.4vh,16px) clamp(15px,1.9vw,30px);
+    font-size:clamp(14px,2.1vh,26px); font-weight:400; letter-spacing:0;
+    background:var(--card); border:3px solid var(--line); color:var(--ink);
+    box-shadow:0 5px 0 rgba(180,140,100,.22);
+    transition:transform .08s, box-shadow .08s;
   }
-  .btn:active{transform:translateY(2px)}
-  .btn.primary{background:var(--theme); border-color:var(--theme); color:#fff; min-width:clamp(130px,15vw,240px)}
-  .btn.blue{background:var(--blue); border-color:var(--blue); color:#fff}
+  .btn:active{transform:translateY(4px); box-shadow:0 1px 0 rgba(180,140,100,.22)}
+  .btn.primary{background:var(--theme); border-color:var(--theme); color:#fff; min-width:clamp(125px,14vw,230px); box-shadow:0 5px 0 rgba(0,0,0,.17)}
+  .btn.blue{background:var(--blue); border-color:var(--blue); color:#fff; box-shadow:0 5px 0 rgba(3,105,161,.4)}
   .btn.ghost{color:var(--sub)}
   .btn[hidden]{display:none}
 
   /* ---------- 오버레이 ---------- */
   .overlay{
     position:fixed; inset:0; z-index:50; display:none;
-    align-items:center; justify-content:center; flex-direction:column; gap:clamp(14px,3vh,40px);
+    align-items:center; justify-content:center; flex-direction:column; gap:clamp(13px,2.8vh,38px);
     text-align:center; padding:4vh 4vw;
   }
   .overlay.show{display:flex}
   #moveOverlay{background:linear-gradient(160deg,#F97316,#FB923C)}
   #moveOverlay *{color:#fff}
-  .move-bell{font-size:clamp(58px,15vh,170px); animation:shake .6s ease-in-out infinite}
+  .move-bell{font-size:clamp(54px,14vh,160px); animation:shake .6s ease-in-out infinite}
   @keyframes shake{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
-  .move-title{font-size:clamp(32px,8.5vh,104px); font-weight:900; letter-spacing:-.04em}
-  .move-sub{font-size:clamp(19px,4vh,50px); font-weight:800; opacity:.95}
+  .move-title{font-family:var(--font-title); font-size:clamp(32px,8.5vh,104px); font-weight:400; letter-spacing:0; text-shadow:0 4px 0 rgba(0,0,0,.12)}
+  .move-sub{font-size:clamp(18px,3.8vh,48px); font-weight:800; opacity:.95}
   .move-count{
-    font-size:clamp(38px,9.5vh,114px); font-weight:900; font-variant-numeric:tabular-nums;
-    background:rgba(255,255,255,.22); border-radius:28px; padding:.1em .55em;
+    font-size:clamp(36px,9vh,110px); font-weight:900; font-variant-numeric:tabular-nums;
+    background:rgba(255,255,255,.22); border-radius:26px; padding:.1em .55em;
   }
-  #doneOverlay{background:linear-gradient(160deg,#0EA5E9,#38BDF8)}
+  .move-temp{
+    font-size:clamp(17px,3.2vh,40px); font-weight:900;
+    background:rgba(255,255,255,.25); border-radius:999px; padding:.25em 1.1em;
+  }
+  #doneOverlay{background:linear-gradient(160deg,#14B8A6,#5EEAD4)}
   #doneOverlay *{color:#fff}
   #stepOverlay{background:linear-gradient(160deg,#8B5CF6,#A78BFA)}
   #stepOverlay *{color:#fff}
-  #bankOverlay{background:var(--bg)}
-  .bank-grid{
-    display:flex; flex-wrap:wrap; gap:clamp(8px,1.4vh,20px); justify-content:center; align-content:center;
-    max-width:92vw; max-height:74vh; overflow:auto;
+
+  /* 힌트 카드 전체화면 */
+  #hintOverlay{background:var(--bg); gap:clamp(8px,1.4vh,18px); padding:clamp(10px,2vh,26px) clamp(10px,2vw,30px)}
+  .hint-head{text-align:center}
+  .hint-head h2{font-family:var(--font-title); font-size:clamp(22px,3.8vh,44px); font-weight:400; letter-spacing:0}
+  .hint-head p{font-size:clamp(11px,1.8vh,20px); color:var(--sub); font-weight:700; margin-top:.2em}
+  .hint-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(7px,1vw,16px);
+    width:100%; flex:1 1 auto; min-height:0;
   }
-  .bank-grid .word{font-size:clamp(17px,3.4vh,42px); margin:0}
+  .hcat{
+    background:var(--card); border-radius:18px; box-shadow:var(--shadow);
+    padding:clamp(8px,1.3vh,16px) clamp(7px,.8vw,14px); display:flex; flex-direction:column; gap:.4em;
+    min-height:0; overflow:auto;
+  }
+  .hcat h3{font-family:var(--font-title); font-size:clamp(14px,2.3vh,27px); font-weight:400; text-align:center; letter-spacing:0}
+  .hcat .hsub{font-size:clamp(9px,1.4vh,15px); color:var(--sub); font-weight:700; text-align:center; margin-bottom:.2em}
+  .hcat ul{list-style:none; display:flex; flex-direction:column; gap:clamp(3px,.5vh,7px)}
+  .hcat li{
+    border-radius:999px; padding:.32em .7em; text-align:center; font-weight:700;
+    font-size:clamp(11px,1.75vh,21px); line-height:1.25;
+  }
+  .hcat.c0 h3{color:#9D174D} .hcat.c0 li{background:var(--pink-soft);   color:#9D174D}
+  .hcat.c1 h3{color:#15803D} .hcat.c1 li{background:var(--green-soft);  color:#15803D}
+  .hcat.c2 h3{color:#0369A1} .hcat.c2 li{background:var(--blue-soft);   color:#0369A1}
+  .hcat.c3 h3{color:#5B21B6} .hcat.c3 li{background:var(--violet-soft); color:#5B21B6}
+  .hint-foot{
+    text-align:center; font-weight:800; font-size:clamp(12px,1.9vh,22px); color:#92400E;
+    background:#FEF3C7; border-radius:14px; padding:.5em 1.2em;
+  }
 
   /* 설정 */
   #setup{background:rgba(255,247,237,.97); overflow:auto; align-items:flex-start}
   .setup-box{
     background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
-    width:min(960px,94vw); margin:auto; padding:clamp(20px,3vh,38px); text-align:left;
+    width:min(980px,94vw); margin:auto; padding:clamp(19px,2.8vh,36px); text-align:left;
   }
-  .setup-box h1{font-size:clamp(21px,3.2vh,36px); font-weight:900; letter-spacing:-.03em; margin-bottom:.15em}
-  .setup-box .desc{color:var(--sub); font-size:clamp(13px,1.8vh,19px); margin-bottom:1.2em; line-height:1.5}
+  .setup-box h1{font-family:var(--font-title); font-size:clamp(22px,3.2vh,36px); font-weight:400; letter-spacing:0; margin-bottom:.15em}
+  .setup-box .desc{color:var(--sub); font-size:clamp(12px,1.75vh,18px); margin-bottom:1.2em; line-height:1.5}
   .sec-title{
-    display:flex; align-items:center; gap:.5em; margin:1.6em 0 .8em;
-    font-size:clamp(16px,2.3vh,24px); font-weight:900; letter-spacing:-.02em;
+    display:flex; align-items:center; gap:.5em; margin:1.5em 0 .75em;
+    font-size:clamp(15px,2.2vh,23px); font-weight:900; letter-spacing:-.02em;
     padding-bottom:.5em; border-bottom:2px solid var(--line);
   }
   .sec-title .no{
     width:1.7em; height:1.7em; border-radius:50%; color:#fff; font-size:.85em;
     display:flex; align-items:center; justify-content:center; font-weight:900;
   }
-  .sec-title.s1 .no{background:var(--violet)} .sec-title.s2 .no{background:var(--green)} .sec-title.s3 .no{background:var(--accent)}
-  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:clamp(10px,1.5vh,16px)}
-  label{display:block; font-weight:800; font-size:clamp(13px,1.7vh,17px); margin-bottom:.4em}
+  .sec-title.s1 .no{background:var(--violet)} .sec-title.s2 .no{background:var(--pink)}
+  .sec-title.s3 .no{background:var(--accent)} .sec-title.s4 .no{background:var(--teal)}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(175px,1fr)); gap:clamp(9px,1.4vh,15px)}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:clamp(9px,1.4vh,15px)}
+  label{display:block; font-weight:800; font-size:clamp(12px,1.65vh,17px); margin-bottom:.4em}
   input[type=number],input[type=text],textarea{
-    width:100%; font-family:inherit; font-size:clamp(14px,1.9vh,19px); font-weight:600;
+    width:100%; font-family:inherit; font-size:clamp(13px,1.8vh,18px); font-weight:600;
     padding:.6em .8em; border:2px solid var(--line); border-radius:12px; background:#FFFDFB; color:var(--ink);
   }
   input:focus,textarea:focus{outline:none; border-color:var(--accent)}
-  textarea{min-height:96px; resize:vertical; line-height:1.6}
-  .row{margin-top:clamp(10px,1.6vh,18px)}
-  .switch{display:flex; align-items:center; gap:.6em; font-weight:800; font-size:clamp(13px,1.8vh,18px)}
+  textarea{min-height:92px; resize:vertical; line-height:1.6}
+  .row{margin-top:clamp(9px,1.5vh,17px)}
+  .switch{display:flex; align-items:center; gap:.6em; font-weight:800; font-size:clamp(13px,1.75vh,18px)}
   .switch input{width:1.3em; height:1.3em; accent-color:var(--accent)}
   .setup-actions{
     display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
-    margin-top:clamp(18px,2.6vh,28px); padding-top:clamp(14px,2vh,20px); border-top:2px solid var(--line);
+    margin-top:clamp(17px,2.5vh,27px); padding-top:clamp(13px,1.9vh,19px); border-top:2px solid var(--line);
   }
-  .tip{background:var(--blue-soft); border-radius:14px; padding:1em 1.2em; margin-top:1.2em; font-size:clamp(13px,1.7vh,17px); line-height:1.6; color:#0C4A6E}
+  .tip{background:var(--blue-soft); border-radius:14px; padding:1em 1.2em; margin-top:1.2em; font-size:clamp(12px,1.65vh,17px); line-height:1.6; color:#0C4A6E}
   .tip b{color:#075985}
 
-  /* ---------- 모바일 / 세로 화면 ---------- */
+  /* ---------- 모바일 / 세로 ---------- */
   @media (max-width:900px), (max-aspect-ratio:1/1){
-    #app{padding:9px 11px 13px; gap:9px}
-    .steps{gap:5px}
-    .step{font-size:clamp(11px,3vw,15px); padding:8px 5px; border-radius:13px; gap:.35em}
+    #app{padding:8px 10px 12px; gap:8px}
+    .steps{gap:4px}
+    .step{font-size:clamp(10px,2.7vw,14px); padding:7px 4px; border-radius:12px; gap:.3em}
     .step .stitle{display:none}
     .step.on .stitle{display:inline}
-    .icon-btn{font-size:clamp(11px,3vw,14px); padding:.5em .6em; border-radius:12px}
+    .icon-btn{font-size:clamp(10px,2.7vw,13px); padding:.45em .55em; border-radius:11px}
 
-    .main{flex-direction:column; gap:9px}
-    .timer-card{flex:0 0 auto; padding:10px 0}
-    .ring-wrap{width:min(54vw,27vh)}
-    .time{font-size:clamp(38px,14vw,78px)}
-    .time-sub{font-size:clamp(11px,3vw,15px)}
+    .main{flex-direction:column; gap:8px}
+    .timer-card{flex:0 0 auto; padding:9px 0}
+    .ring-wrap{width:min(52vw,25vh)}
+    .time{font-size:clamp(36px,13vw,72px)}
+    .time-sub{font-size:clamp(10px,2.8vw,14px)}
     .ring-bg,.ring-fg{stroke-width:18}
 
-    .right{flex:1 1 auto; gap:9px}
-    .box{padding:13px 15px}
-    .lead{font-size:clamp(17px,4.6vw,27px)}
-    .book{font-size:clamp(13px,3.5vw,17px)}
-    .q .qtext{font-size:clamp(15px,4.1vw,23px)}
-    .q .qno{font-size:clamp(13px,3.4vw,17px)}
-    .say{font-size:clamp(18px,5vw,29px)}
-    .tag{font-size:clamp(11px,3.1vw,15px); padding:.28em .7em}
-    .line .tag{margin-top:.2em}
-    .note{font-size:clamp(11px,2.9vw,14px)}
-    .bank-label{font-size:clamp(10px,2.9vw,13px)}
-    .word{font-size:clamp(13px,3.8vw,18px); padding:.3em .8em}
-    .round-badge{font-size:clamp(13px,3.6vw,17px)}
-    .dot{width:9px; height:9px}
-    .cnum{font-size:clamp(26px,7vw,40px)}
-    .counter .cbtn{width:46px; height:46px; font-size:24px}
+    .right{flex:1 1 auto; gap:8px}
+    .box{padding:12px 14px}
+    .lead{font-size:clamp(16px,4.4vw,26px)}
+    .sublead{font-size:clamp(12px,3.2vw,16px)}
+    .badge-top{font-size:clamp(12px,3.3vw,16px)}
+    .q .qtext{font-size:clamp(14px,3.9vw,21px)}
+    .q .qno{font-size:clamp(12px,3.2vw,16px)}
+    .goal{font-size:clamp(14px,3.8vw,20px)}
+    .fr{font-size:clamp(15px,4.2vw,23px)}
+    .fr .blank{min-width:90px; border-bottom-width:3px}
+    .td{font-size:clamp(12px,3.3vw,17px)}
+    .round-badge{font-size:clamp(12px,3.4vw,16px)}
+    .dot{width:8px; height:8px}
+    .cnum{font-size:clamp(24px,6.5vw,36px)}
+    .counter .cbtn{width:42px; height:42px; font-size:22px}
+    .tnow{font-size:clamp(18px,5vw,28px)}
+    .tube span{height:14px}
+    .mir .mi{font-size:clamp(20px,5.5vw,30px)}
+    .mir .mt{font-size:clamp(11px,3.1vw,15px)}
+    .bank-label{font-size:clamp(9px,2.6vw,12px)}
+    .word{font-size:clamp(12px,3.5vw,17px); padding:.28em .75em}
 
-    .controls{gap:7px}
-    .btn{flex:1 1 0; min-width:78px; min-height:50px; padding:9px 7px; font-size:clamp(13px,3.7vw,18px); border-radius:14px}
+    .controls{gap:6px}
+    .btn{flex:1 1 0; min-width:74px; min-height:48px; padding:8px 6px; font-size:clamp(12px,3.5vw,17px); border-radius:13px}
     .btn.primary{flex:1 1 100%; min-width:0}
 
-    .move-title{font-size:clamp(28px,8.5vw,48px)}
-    .move-sub{font-size:clamp(15px,4.4vw,24px)}
-    .move-bell{font-size:clamp(50px,15vw,86px)}
-    .move-count{font-size:clamp(32px,10vw,60px)}
+    .move-title{font-size:clamp(26px,8vw,44px)}
+    .move-sub{font-size:clamp(14px,4.2vw,22px)}
+    .move-bell{font-size:clamp(46px,14vw,80px)}
+    .move-count{font-size:clamp(30px,9.5vw,56px)}
+    .move-temp{font-size:clamp(14px,4vw,20px)}
 
-    .setup-box{padding:17px; border-radius:18px}
+    .hint-grid{grid-template-columns:1fr 1fr}
+    .hcat li{font-size:clamp(10px,2.9vw,14px)}
+
+    .setup-box{padding:16px; border-radius:18px}
     .grid{grid-template-columns:1fr 1fr}
     .setup-actions .btn{flex:1 1 100%}
   }
 
-  /* 폰 가로 */
   @media (max-height:430px) and (min-aspect-ratio:1/1){
     .main{flex-direction:row}
-    .timer-card{flex:0 0 32%}
-    .ring-wrap{width:min(100%,29vh)}
+    .timer-card{flex:0 0 30%}
+    .ring-wrap{width:min(100%,28vh)}
     .bank{display:none}
-    .note{display:none}
-    .btn, .btn.primary{flex:1 1 0; min-height:42px; font-size:clamp(12px,2.9vh,16px)}
-    #app{padding:7px 11px 9px; gap:7px}
+    .btn, .btn.primary{flex:1 1 0; min-height:40px; font-size:clamp(12px,2.8vh,16px)}
+    #app{padding:6px 10px 8px; gap:6px}
     .step .stitle{display:none}
+    .hint-grid{grid-template-columns:repeat(4,1fr)}
   }
 </style>
 </head>
 <body data-stage="1">
+<div class="torn t"></div>
+<div class="torn b"></div>
 <div id="app">
   <div class="top">
     <div class="steps" id="steps">
-      <button class="step" data-go="1"><span class="no">1</span><span class="stitle">동기유발 · 책 읽기</span></button>
-      <button class="step" data-go="2"><span class="no">2</span><span class="stitle">나의 장점 쓰기</span></button>
-      <button class="step" data-go="3"><span class="no">3</span><span class="stitle">서로 물어보고 조사</span></button>
+      <button class="step" data-go="1"><span class="no">1</span><span class="stitle">그림책 · 내가 너라서 좋아</span></button>
+      <button class="step" data-go="2"><span class="no">2</span><span class="stitle">활동1 · 내가 나라서 좋아</span></button>
+      <button class="step" data-go="3"><span class="no">3</span><span class="stitle">활동2 · 장점 마켓</span></button>
+      <button class="step" data-go="4"><span class="no">4</span><span class="stitle">정리 · 가족의 거울</span></button>
     </div>
     <div class="tools">
-      <button class="icon-btn" id="bankBtn">낱말</button>
+      <button class="icon-btn" id="hintBtn">힌트 카드</button>
       <button class="icon-btn" id="fsBtn">전체화면</button>
       <button class="icon-btn" id="setupBtn">설정</button>
     </div>
@@ -327,6 +457,7 @@
           <circle class="ring-fg" id="ringFg" cx="130" cy="130" r="112"></circle>
         </svg>
         <div class="time-text">
+          <div class="time-emoji" id="timeEmoji">📖</div>
           <div class="time" id="timeText">0:00</div>
           <div class="time-sub" id="timeSub">시작을 눌러 주세요</div>
         </div>
@@ -334,20 +465,29 @@
     </div>
 
     <div class="right">
-      <!-- 1단계 -->
+      <!-- 1단계 · 그림책 -->
       <div class="panel" id="p1">
         <div class="box grow">
-          <div class="book" id="s1book">📖 <span id="s1bookName">책 제목</span></div>
-          <div class="lead" id="s1lead">이야기를 함께 읽어 봅시다</div>
+          <div class="badge-top">📖 <span id="s1book">내가 너라서 좋아</span></div>
+          <div class="lead" id="s1lead">그림책을 함께 읽어 봅시다</div>
           <div class="qlist" id="s1qs"></div>
+          <div class="goal" id="s1goal"></div>
         </div>
       </div>
 
-      <!-- 2단계 -->
+      <!-- 2단계 · 활동1 -->
       <div class="panel" id="p2">
         <div class="box grow">
-          <div class="lead" id="s2lead">나의 장점을 세 가지 적어 봅시다</div>
-          <div class="note" id="s2note">떠오르지 않으면 아래 낱말에서 골라도 좋아요</div>
+          <div class="badge-top">🪞 활동 1 · 내가 나라서 좋아!</div>
+          <div class="lead" id="s2lead">내 안의 보물 찾기</div>
+          <div class="frame">
+            <div class="fr">내가 <span class="blank"></span> 라서 좋아!</div>
+            <div class="fr">왜냐하면 <span class="blank"></span> 때문이야 <small>~♡</small></div>
+          </div>
+          <div class="todo">
+            <div class="td"><span class="tno">1</span><span>거울 칸에 나의 장점과 그 까닭을 써요.</span></div>
+            <div class="td"><span class="tno">2</span><span id="s2todo2">장점마켓에 가져갈 나의 또 다른 장점 <b>네 가지</b>를 써요.</span></div>
+          </div>
           <div>
             <div class="clabel">다 쓴 사람</div>
             <div class="counter">
@@ -359,31 +499,44 @@
           </div>
         </div>
         <div class="bank">
-          <div class="bank-label">장점 낱말</div>
+          <div class="bank-label">장점 힌트</div>
           <div class="bank-track"><div class="marquee" id="marquee2"></div></div>
         </div>
       </div>
 
-      <!-- 3단계 -->
+      <!-- 3단계 · 활동2 -->
       <div class="panel" id="p3">
         <div class="box grow">
           <div class="round-line">
-            <div class="round-badge" id="roundBadge">라운드 1 / 10</div>
+            <div class="round-badge" id="roundBadge">거래 1 / 10</div>
             <div class="dots" id="dots"></div>
           </div>
-          <div class="line">
-            <span class="tag ask">묻기</span>
-            <span class="say" id="askText">너의 장점은 무엇이니?</span>
+          <div class="lead" style="font-size:clamp(17px,3.4vh,38px)">🥕 당근! 장점 거래하실래요?</div>
+          <div class="qlist" id="s3steps"></div>
+          <div class="thermo">
+            <div class="tlabel">나의<br>장점 온도</div>
+            <div class="tube" id="tube"></div>
+            <div class="tnow" id="tNow">0℃</div>
           </div>
-          <div class="line">
-            <span class="tag praise">칭찬</span>
-            <span class="say" id="praiseText"></span>
-          </div>
-          <div class="note">친구의 눈을 보고, 웃으면서 말해요 🙂</div>
         </div>
         <div class="bank">
-          <div class="bank-label">장점 낱말</div>
+          <div class="bank-label">장점 힌트</div>
           <div class="bank-track"><div class="marquee" id="marquee3"></div></div>
+        </div>
+      </div>
+
+      <!-- 4단계 · 정리 -->
+      <div class="panel" id="p4">
+        <div class="box grow">
+          <div class="badge-top">💌 정리</div>
+          <div class="lead" id="s4lead">가족의 거울에 비친 나</div>
+          <div class="sublead" id="s4sub">오늘 발견한 나의 장점을 가족에게 편지로 전해 봅시다</div>
+          <div class="mirrors">
+            <div class="mir a"><span class="mi">🪞</span><span class="mt">내가<br>바라본 나</span></div>
+            <div class="mir b"><span class="mi">🌟</span><span class="mt">친구가<br>바라본 나</span></div>
+            <div class="mir c"><span class="mi">🍀</span><span class="mt">가족이<br>바라본 나</span></div>
+          </div>
+          <div class="goal" id="s4goal">다양한 모습의 나, <b>모두 소중해!</b><br>있는 그대로 너는 멋져 ♡</div>
         </div>
       </div>
     </div>
@@ -392,7 +545,7 @@
   <div class="controls">
     <button class="btn primary" id="startBtn">시작</button>
     <button class="btn" id="plusBtn">+1분</button>
-    <button class="btn blue" id="nextBtn" hidden>이동 →</button>
+    <button class="btn blue" id="nextBtn" hidden>당근왔숑! →</button>
     <button class="btn ghost" id="resetBtn">처음으로</button>
     <button class="btn blue" id="stepBtn">다음 단계 →</button>
   </div>
@@ -400,33 +553,38 @@
 
 <!-- 단계 전환 -->
 <div class="overlay" id="stepOverlay">
-  <div class="move-bell" id="stepIcon">📝</div>
-  <div class="move-title" id="stepTitle">2단계</div>
-  <div class="move-sub" id="stepSub">나의 장점 쓰기</div>
+  <div class="move-bell" id="stepIcon">📖</div>
+  <div class="move-title" id="stepTitle">1단계</div>
+  <div class="move-sub" id="stepSub">그림책 읽기</div>
   <button class="btn" id="stepClose" style="margin-top:2vh">시작하기</button>
 </div>
 
-<!-- 자리 이동 -->
+<!-- 체인지! -->
 <div class="overlay" id="moveOverlay">
-  <div class="move-bell">🔔</div>
-  <div class="move-title">자리를 옮겨요!</div>
-  <div class="move-sub" id="moveSub">바깥줄 친구들 → 오른쪽으로 한 칸</div>
+  <div class="move-bell">🥕</div>
+  <div class="move-title" id="moveTitle">당근왔숑!</div>
+  <div class="move-sub" id="moveSub">다음 친구를 만나요</div>
+  <div class="move-temp" id="moveTemp">나의 장점 온도 10℃</div>
   <div class="move-count" id="moveCount">8</div>
 </div>
 
-<!-- 종료 -->
+<!-- 활동 종료 -->
 <div class="overlay" id="doneOverlay">
   <div class="move-bell">🎉</div>
-  <div class="move-title">활동 끝!</div>
-  <div class="move-sub">친구들의 장점을 정말 많이 찾았어요</div>
+  <div class="move-title">장점 마켓 끝!</div>
+  <div class="move-sub" id="doneSub">오늘 나의 장점 온도는 100℃!</div>
   <button class="btn" id="doneClose" style="margin-top:2vh">닫기</button>
 </div>
 
-<!-- 낱말 크게 -->
-<div class="overlay" id="bankOverlay">
-  <div class="move-title" style="color:var(--ink); font-size:clamp(23px,4.8vh,54px)">장점 낱말</div>
-  <div class="bank-grid" id="bankGrid"></div>
-  <button class="btn" id="bankClose">닫기</button>
+<!-- 장점 힌트 카드 -->
+<div class="overlay" id="hintOverlay">
+  <div class="hint-head">
+    <h2>🌟 장점 힌트 카드</h2>
+    <p>이 카드는 내 안의 좋은 점을 찾는 데 도움을 주는 힌트예요. 나와 닮은 모습을 찾아보세요!</p>
+  </div>
+  <div class="hint-grid" id="hintGrid"></div>
+  <div class="hint-foot">여기에 없는 나만의 장점을 직접 찾아도 좋아요! 세상에 하나뿐인 특별한 나는 더 많은 좋은 점을 가지고 있으니까요 ♡</div>
+  <button class="btn" id="hintClose">닫기</button>
 </div>
 
 <!-- 설정 -->
@@ -435,40 +593,74 @@
     <h1>수업 설정</h1>
     <p class="desc">공개수업 전에 한 번만 맞춰 두면 됩니다. 설정은 이 브라우저에 자동 저장돼요.</p>
 
-    <div class="sec-title s1"><span class="no">1</span>동기유발 · 책 읽기</div>
+    <div class="sec-title s1"><span class="no">1</span>그림책 읽기</div>
     <div class="grid">
       <div><label for="c1Sec">읽기 시간(분)</label><input type="number" id="c1Sec" min="1" max="60" value="10"></div>
-      <div><label for="c1Book">책 제목</label><input type="text" id="c1Book" value="내가 너라서 좋아"></div>
+      <div><label for="c1Book">그림책 제목</label><input type="text" id="c1Book"></div>
     </div>
-    <div class="row"><label for="c1Lead">안내 문구</label><input type="text" id="c1Lead" value="이야기를 함께 읽어 봅시다"></div>
-    <div class="row">
-      <label for="c1Qs">생각할 질문 <span style="font-weight:600;color:var(--sub)">(한 줄에 하나씩)</span></label>
-      <textarea id="c1Qs"></textarea>
-    </div>
+    <div class="row"><label for="c1Lead">안내 문구</label><input type="text" id="c1Lead"></div>
+    <div class="row"><label for="c1Qs">발문 <span style="font-weight:600;color:var(--sub)">(한 줄에 하나씩)</span></label><textarea id="c1Qs"></textarea></div>
+    <div class="row"><label for="c1Goal">학습 목표</label><input type="text" id="c1Goal"></div>
 
-    <div class="sec-title s2"><span class="no">2</span>나의 장점 쓰기</div>
+    <div class="sec-title s2"><span class="no">2</span>활동 1 · 내가 나라서 좋아!</div>
     <div class="grid">
-      <div><label for="c2Sec">쓰기 시간(분)</label><input type="number" id="c2Sec" min="1" max="60" value="5"></div>
+      <div><label for="c2Sec">활동 시간(분)</label><input type="number" id="c2Sec" min="1" max="60" value="8"></div>
       <div><label for="c2Warn">"곧 끝나요" 경고(초)</label><input type="number" id="c2Warn" min="0" max="120" step="5" value="30"></div>
       <div><label for="c2Total">학급 인원(명)</label><input type="number" id="c2Total" min="1" max="60" value="24"></div>
+      <div><label for="c2Cards">장점마켓에 가져갈 장점 수</label><input type="number" id="c2Cards" min="1" max="10" value="4"></div>
     </div>
-    <div class="row"><label for="c2Lead">안내 문구</label><input type="text" id="c2Lead" value="나의 장점을 세 가지 적어 봅시다"></div>
+    <div class="row"><label for="c2Lead">안내 문구</label><input type="text" id="c2Lead"></div>
 
-    <div class="sec-title s3"><span class="no">3</span>서로 물어보고 조사하기</div>
+    <div class="sec-title s3"><span class="no">3</span>활동 2 · 당근! 장점 마켓</div>
     <div class="grid">
-      <div><label for="c3Rounds">라운드 수</label><input type="number" id="c3Rounds" min="1" max="30" value="10"></div>
-      <div><label for="c3Sec">한 라운드(초)</label><input type="number" id="c3Sec" min="10" max="900" step="10" value="120"></div>
-      <div><label for="c3Warn">경고(초)</label><input type="number" id="c3Warn" min="0" max="120" step="5" value="20"></div>
+      <div><label for="c3Rounds">거래 횟수(라운드)</label><input type="number" id="c3Rounds" min="1" max="30" value="10"></div>
+      <div><label for="c3Sec">한 거래 시간(초)</label><input type="number" id="c3Sec" min="10" max="900" step="10" value="90"></div>
+      <div><label for="c3Warn">경고(초)</label><input type="number" id="c3Warn" min="0" max="120" step="5" value="15"></div>
       <div><label for="c3Move">이동 시간(초)</label><input type="number" id="c3Move" min="3" max="60" value="8"></div>
+      <div><label for="c3Step">거래 1회당 온도(℃)</label><input type="number" id="c3Step" min="1" max="50" value="10"></div>
     </div>
-    <div class="row"><label for="c3Ask">묻는 말</label><input type="text" id="c3Ask" value="너의 장점은 무엇이니?"></div>
-    <div class="row"><label for="c3Praise">칭찬하는 말 <span style="font-weight:600;color:var(--sub)">(○○○ 자리는 그대로 두세요)</span></label><input type="text" id="c3Praise" value="너의 장점이 ○○○이구나. 정말 멋져!"></div>
-    <div class="row"><label for="c3MoveMsg">이동 안내 문구</label><input type="text" id="c3MoveMsg" value="바깥줄 친구들 → 오른쪽으로 한 칸"></div>
+    <div class="row"><label for="c3Steps">활동 방법 <span style="font-weight:600;color:var(--sub)">(한 줄에 하나씩)</span></label><textarea id="c3Steps"></textarea></div>
+    <div class="row"><label for="c3MoveMsg">신호 뒤 안내 문구</label><input type="text" id="c3MoveMsg"></div>
+    <div class="row grid2">
+      <div>
+        <label for="cSignal">「당근왔숑!」 신호음</label>
+        <select id="cSignal" style="width:100%; font-family:inherit; font-size:clamp(13px,1.8vh,18px); font-weight:600; padding:.6em .8em; border:2px solid var(--line); border-radius:12px; background:#FFFDFB; color:var(--ink)">
+          <option value="voice">음성으로 말하기 (추천)</option>
+          <option value="chime">당근 차임 (딩동)</option>
+          <option value="bell">종소리</option>
+          <option value="custom">내가 넣은 소리 파일</option>
+        </select>
+      </div>
+      <div>
+        <label for="cSignalText">음성으로 말할 내용</label>
+        <input type="text" id="cSignalText" placeholder="당근왔숑!">
+      </div>
+    </div>
+    <div class="row grid2">
+      <div>
+        <label for="cSoundFile">소리 파일 넣기 <span style="font-weight:600;color:var(--sub)">(mp3·m4a, 2MB 이하)</span></label>
+        <input type="file" id="cSoundFile" accept="audio/*" style="width:100%; font-size:clamp(12px,1.7vh,17px); padding:.5em 0">
+        <div class="hint" id="soundFileInfo" style="color:var(--sub); font-size:clamp(11px,1.5vh,15px); font-weight:700"></div>
+      </div>
+      <div style="display:flex; align-items:flex-end; gap:8px">
+        <button class="btn" id="cSignalTest" style="flex:1 1 auto">🔊 신호음 들어보기</button>
+        <button class="btn ghost" id="cSoundClear" style="flex:0 0 auto">파일 지우기</button>
+      </div>
+    </div>
 
-    <div class="sec-title"><span class="no" style="background:var(--sub)">＋</span>공통</div>
-    <div class="row">
-      <label for="cWords">장점 낱말 <span style="font-weight:600;color:var(--sub)">(쉼표 또는 줄바꿈으로 구분 · 2·3단계에서 사용)</span></label>
-      <textarea id="cWords"></textarea>
+    <div class="sec-title s4"><span class="no">4</span>정리 · 가족의 거울에 비친 나</div>
+    <div class="grid">
+      <div><label for="c4Sec">정리 시간(분)</label><input type="number" id="c4Sec" min="1" max="60" value="5"></div>
+    </div>
+    <div class="row"><label for="c4Lead">안내 문구</label><input type="text" id="c4Lead"></div>
+    <div class="row"><label for="c4Sub">보조 문구</label><input type="text" id="c4Sub"></div>
+
+    <div class="sec-title"><span class="no" style="background:var(--sub)">＋</span>장점 힌트 카드</div>
+    <div class="grid2">
+      <div><label for="h0">공부 · 도전</label><textarea id="h0"></textarea></div>
+      <div><label for="h1">성격 · 마음</label><textarea id="h1"></textarea></div>
+      <div><label for="h2">친구 · 사람</label><textarea id="h2"></textarea></div>
+      <div><label for="h3">생활 · 태도</label><textarea id="h3"></textarea></div>
     </div>
     <div class="row switch">
       <input type="checkbox" id="cSound" checked>
@@ -476,8 +668,8 @@
     </div>
 
     <div class="tip">
-      <b>3단계 자리 배치</b> — 책상을 두 줄로 마주 보게 놓고, <b>안쪽 줄은 그대로</b>, <b>바깥줄만 오른쪽으로 한 칸</b> 옮기면 됩니다.
-      맨 끝 학생은 반대쪽 끝으로. 이렇게 하면 <b>학급 인원의 절반만큼 라운드</b>를 돌았을 때 모두가 서로 한 번씩 만납니다.<br>
+      <b>활동 2 자리 배치</b> — 책상을 두 줄로 마주 보게 놓고, <b>안쪽 줄은 그대로</b>, <b>바깥줄만 오른쪽으로 한 칸</b> 옮기면 됩니다.
+      맨 끝 학생은 반대쪽 끝으로. 이렇게 하면 <b>학급 인원의 절반만큼</b> 거래했을 때 모두가 서로 한 번씩 만납니다.<br>
       <b>홀수 학급</b>이면 한 자리를 <b>3명</b>으로 만들거나 선생님이 한 자리에 들어가면 자연스럽습니다.
     </div>
 
@@ -492,53 +684,60 @@
 (function(){
   "use strict";
 
-  var DEFAULT_WORDS = [
-    "잘 웃어요","잘 들어줘요","친절해요","꾸준해요","씩씩해요","정리를 잘해요",
-    "인사를 잘해요","잘 도와줘요","약속을 잘 지켜요","정직해요","용기가 있어요",
-    "배려심이 깊어요","책을 좋아해요","그림을 잘 그려요","노래를 잘해요","춤을 잘 춰요",
-    "달리기가 빨라요","운동을 잘해요","글씨를 예쁘게 써요","목소리가 커요","재미있어요",
-    "끈기가 있어요","생각이 깊어요","호기심이 많아요","계산이 빨라요","손이 야무져요",
-    "먼저 사과해요","같이 놀자고 해줘요","질문을 잘해요","포기하지 않아요"
+  /* ---------- 장점 힌트 카드 (PDF 원본) ---------- */
+  var HINT_META = [
+    {name:"공부 · 도전", sub:"배우고 해내는 내가 좋아요", cls:"w-study"},
+    {name:"성격 · 마음", sub:"이런 마음을 가지고 있어요", cls:"w-mind"},
+    {name:"친구 · 사람", sub:"함께할 때 더 빛나요",       cls:"w-friend"},
+    {name:"생활 · 태도", sub:"이렇게 행동해요",           cls:"w-life"}
   ];
-  var DEFAULT_QS = [
-    "주인공은 왜 그렇게 느꼈을까요?",
-    "나와 비슷한 점이 있었나요?",
-    "나에게도 이런 좋은 점이 있을까요?"
+  var HINT_DEFAULT = [
+    ["수학 고난이도에 도전해요","책을 많이 읽어요","글을 잘 써요","발표를 잘해요","그림을 잘 그려요","만들기를 잘해요","운동을 잘해요","음악·춤을 잘해요","컴퓨터나 기계를 잘 다뤄요","새로운 것을 배우는 걸 좋아해요","어려운 문제도 끝까지 생각해요","호기심이 많아요"],
+    ["긍정적이에요","끈기가 있어요","용기가 있어요","책임감이 있어요","자신감이 있어요","차분하고 침착해요","꾸준히 노력해요","도전을 좋아해요","생각이 깊어요","작은 일에도 감사해요","실수를 두려워하지 않아요","새로운 생각을 잘해요"],
+    ["친구를 잘 도와줘요","친구의 말을 잘 들어줘요","친구에게 간식을 나눠줘요","친구의 말을 잘 이해해요","친구에게 규칙을 잘 설명해요","상대팀이어도 칭찬해요","친구를 잘 웃겨줘요","다른 사람을 배려해요","친구를 위로해요","인사를 잘해요","함께 협력해요","다양한 친구와 잘 어울려요"],
+    ["달리기가 빨라요","시간을 잘 지켜요","정리를 잘해요","약속을 잘 지켜요","맡은 일을 열심히 해요","자신을 스스로 잘 돌봐요","가족을 많이 사랑해요","예의 바르게 행동해요","몸과 마음을 건강하게 지켜요","계획을 세워 실천해요","주변을 깔끔하게 정리해요","어떤 일이든 최선을 다해요"]
   ];
 
   var DEFAULTS = {
-    sound:true,
-    words:DEFAULT_WORDS.slice(),
-    s1:{ sec:600, book:"내가 너라서 좋아", lead:"이야기를 함께 읽어 봅시다", qs:DEFAULT_QS.slice() },
-    s2:{ sec:300, warn:30, total:24, lead:"나의 장점을 세 가지 적어 봅시다" },
-    s3:{ rounds:10, sec:120, warn:20, move:8,
-         ask:"너의 장점은 무엇이니?",
-         praise:"너의 장점이 ○○○이구나. 정말 멋져!",
-         moveMsg:"바깥줄 친구들 → 오른쪽으로 한 칸" }
+    sound:true, signal:"voice", signalText:"당근왔숑!", customSound:"",
+    hints:JSON.parse(JSON.stringify(HINT_DEFAULT)),
+    s1:{ sec:600, book:"내가 너라서 좋아", lead:"그림책을 함께 읽어 봅시다",
+         qs:["거울 속의 내가 주인공에게 해준 말 중 가장 기억에 남는 말은 무엇인가요?",
+             "거울이 여러분에게 말을 해준다면, 여러분은 어떤 말을 듣고 싶나요?"],
+         goal:"나의 반짝이는 장점을 발견하고, 친구들과 나누어 봅시다!" },
+    s2:{ sec:480, warn:30, total:24, cards:4, lead:"내 안의 보물 찾기" },
+    s3:{ rounds:10, sec:90, warn:15, move:8, step:10,
+         steps:["마주 앉은 친구에게 나의 장점 하나를 소개해요.",
+                "친구의 장점 중 갖고 싶은 장점 하나를 골라요.",
+                "서로 장점을 주고받으면 장점 온도가 올라가요!",
+                "「당근왔숑!」 신호가 들리면 다음 친구를 만나요."],
+         moveMsg:"다음 친구를 만나요" },
+    s4:{ sec:300, lead:"가족의 거울에 비친 나",
+         sub:"오늘 발견한 나의 장점을 가족에게 편지로 전해 봅시다" }
   };
 
-  var KEY_CFG = "praise_cfg_v2";
+  var KEY_CFG = "praise_cfg_v3";
   var cfg = loadCfg();
 
-  // ---------- 상태 ----------
-  var stage = 1;                        // 1 · 2 · 3
+  /* ---------- 상태 ---------- */
+  var stage = 1;
   var T = { remain:0, total:0, run:false, warned:false };
-  var round = 1;                        // 3단계 라운드
-  var doneCount = 0;                    // 2단계 완료 인원
+  var round = 1;        // 활동2 거래 횟수
+  var doneCount = 0;    // 활동1 완료 인원
 
-  // ---------- DOM ----------
+  /* ---------- DOM ---------- */
   var $ = function(id){ return document.getElementById(id); };
   var timeText=$("timeText"), timeSub=$("timeSub"), ringFg=$("ringFg"),
       startBtn=$("startBtn"), plusBtn=$("plusBtn"), nextBtn=$("nextBtn"),
       resetBtn=$("resetBtn"), stepBtn=$("stepBtn"),
-      moveOverlay=$("moveOverlay"), moveCount=$("moveCount"), moveSub=$("moveSub"),
-      doneOverlay=$("doneOverlay"), bankOverlay=$("bankOverlay"), bankGrid=$("bankGrid"),
-      stepOverlay=$("stepOverlay"), setup=$("setup");
+      moveOverlay=$("moveOverlay"), moveCount=$("moveCount"), moveSub=$("moveSub"), moveTemp=$("moveTemp"),
+      doneOverlay=$("doneOverlay"), doneSub=$("doneSub"),
+      hintOverlay=$("hintOverlay"), stepOverlay=$("stepOverlay"), setup=$("setup");
 
   var RING_C = 2 * Math.PI * 112;
   ringFg.style.strokeDasharray = RING_C;
 
-  // ---------- 저장 ----------
+  /* ---------- 저장 ---------- */
   function merge(fb, v){
     if(!v || typeof v !== "object") return JSON.parse(JSON.stringify(fb));
     var out = JSON.parse(JSON.stringify(fb));
@@ -555,7 +754,7 @@
   }
   function saveCfg(){ try{ localStorage.setItem(KEY_CFG, JSON.stringify(cfg)); }catch(e){} }
 
-  // ---------- 소리 ----------
+  /* ---------- 소리 ---------- */
   var ac = null;
   function audio(){
     if(!cfg.sound) return null;
@@ -577,11 +776,53 @@
     o.start(t0); o.stop(t0 + dur + 0.05);
   }
   function bell(){ tone(880,1.4,.35,"sine",0); tone(1320,1.2,.18,"sine",0.02); tone(660,1.6,.14,"sine",0.04); }
+
+  /* 당근 차임 : 밝은 2음 딩-동 + 반짝 */
+  function carrotChime(){
+    tone(1174.7,.34,.30,"sine",0);      // D6
+    tone(1567.98,.55,.26,"sine",0.16);  // G6
+    tone(2349.3,.30,.09,"sine",0.20);
+    tone(783.99,.60,.10,"triangle",0.16);
+  }
+  /* 음성 "당근왔숑!" */
+  function speakSignal(){
+    try{
+      if(!("speechSynthesis" in window)) return false;
+      var u = new SpeechSynthesisUtterance(cfg.signalText || "당근왔숑!");
+      u.lang = "ko-KR"; u.rate = 1.0; u.pitch = 1.35; u.volume = 1;
+      var vs = window.speechSynthesis.getVoices() || [];
+      for(var i=0;i<vs.length;i++){ if(/ko/i.test(vs[i].lang)){ u.voice = vs[i]; break; } }
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+      return true;
+    }catch(e){ return false; }
+  }
+  var customAudio = null;
+  function playCustom(){
+    try{
+      if(!cfg.customSound) return false;
+      if(!customAudio || customAudio.src !== cfg.customSound){
+        customAudio = new Audio(cfg.customSound);
+      }
+      customAudio.currentTime = 0;
+      var pr = customAudio.play();
+      if(pr && pr.catch) pr.catch(function(){});
+      return true;
+    }catch(e){ return false; }
+  }
+  /* 「당근왔숑!」 신호 : 설정에 따라 */
+  function signal(){
+    if(!cfg.sound) return;
+    if(cfg.signal === "custom" && playCustom()) return;
+    if(cfg.signal === "voice"){ carrotChime(); if(speakSignal()) return; return; }
+    if(cfg.signal === "bell"){ bell(); return; }
+    carrotChime();
+  }
   function warnBeep(){ tone(520,.16,.22,"triangle",0); tone(520,.16,.22,"triangle",0.25); }
   function tick(){ tone(700,.09,.16,"square",0); }
   function ding(){ tone(1046,.5,.22,"sine",0); }
 
-  // ---------- 화면 꺼짐 방지 ----------
+  /* ---------- 화면 꺼짐 방지 ---------- */
   var wakeLock = null;
   function keepAwake(on){
     try{
@@ -596,7 +837,7 @@
     if(document.visibilityState === "visible" && T.run) keepAwake(true);
   });
 
-  // ---------- 유틸 ----------
+  /* ---------- 유틸 ---------- */
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
   function fmt(ms){
@@ -604,16 +845,31 @@
     return Math.floor(s/60) + ":" + ("0" + (s%60)).slice(-2);
   }
   function warnSec(){ return stage===2 ? cfg.s2.warn : (stage===3 ? cfg.s3.warn : 0); }
+  function temp(){ return (round - 1) * cfg.s3.step; }
+  function maxTemp(){ return cfg.s3.rounds * cfg.s3.step; }
 
-  // ---------- 낱말 ----------
-  function renderWords(){
-    var html = cfg.words.map(function(w){ return '<span class="word">'+esc(w)+'</span>'; }).join("");
+  /* ---------- 힌트 카드 ---------- */
+  function renderHints(){
+    var flat = [];
+    for(var c=0; c<cfg.hints.length; c++){
+      for(var i=0; i<cfg.hints[c].length; i++){
+        flat.push('<span class="word '+HINT_META[c].cls+'">'+esc(cfg.hints[c][i])+'</span>');
+      }
+    }
+    var html = flat.join("");
     $("marquee2").innerHTML = html + html;
     $("marquee3").innerHTML = html + html;
-    bankGrid.innerHTML = html;
+
+    $("hintGrid").innerHTML = cfg.hints.map(function(list, c){
+      return '<div class="hcat c'+c+'">'
+           +   '<h3>'+esc(HINT_META[c].name)+'</h3>'
+           +   '<div class="hsub">'+esc(HINT_META[c].sub)+'</div>'
+           +   '<ul>' + list.map(function(w){ return '<li>'+esc(w)+'</li>'; }).join("") + '</ul>'
+           + '</div>';
+    }).join("");
   }
 
-  // ---------- 단계별 화면 ----------
+  /* ---------- 단계별 화면 ---------- */
   function renderStageChrome(){
     document.body.setAttribute("data-stage", String(stage));
     var btns = document.querySelectorAll(".step");
@@ -621,37 +877,45 @@
       var n = i + 1;
       btns[i].className = "step" + (n===stage ? " on" : (n<stage ? " past" : ""));
     }
-    $("p1").className = "panel" + (stage===1 ? " on" : "");
-    $("p2").className = "panel" + (stage===2 ? " on" : "");
-    $("p3").className = "panel" + (stage===3 ? " on" : "");
+    for(var s=1; s<=4; s++) $("p"+s).className = "panel" + (stage===s ? " on" : "");
     nextBtn.hidden = (stage !== 3);
-    stepBtn.hidden = (stage === 3);
+    stepBtn.hidden = (stage === 4);
     plusBtn.textContent = (stage === 3) ? "+30초" : "+1분";
   }
   function renderS1(){
-    $("s1bookName").textContent = cfg.s1.book;
-    $("s1book").style.display = cfg.s1.book ? "inline-flex" : "none";
+    $("s1book").textContent = cfg.s1.book;
     $("s1lead").textContent = cfg.s1.lead;
     $("s1qs").innerHTML = cfg.s1.qs.map(function(q,i){
       return '<div class="q"><span class="qno">'+(i+1)+'</span><span class="qtext">'+esc(q)+'</span></div>';
     }).join("");
+    $("s1goal").innerHTML = '오늘의 학습 목표<br><b>'+esc(cfg.s1.goal)+'</b>';
   }
   function renderS2(){
     $("s2lead").textContent = cfg.s2.lead;
+    $("s2todo2").innerHTML = '장점마켓에 가져갈 나의 또 다른 장점 <b>'+cfg.s2.cards+'가지</b>를 써요.';
     $("cTot").textContent = cfg.s2.total;
     $("cNow").textContent = doneCount;
     $("cBar").style.width = Math.min(100, cfg.s2.total ? doneCount/cfg.s2.total*100 : 0) + "%";
   }
   function renderS3(){
-    $("roundBadge").textContent = "라운드 " + Math.min(round, cfg.s3.rounds) + " / " + cfg.s3.rounds;
-    $("askText").textContent = cfg.s3.ask;
-    $("praiseText").innerHTML = esc(cfg.s3.praise).replace(/○+/g, function(m){
-      return '<span class="blank">'+m+'</span>'; });
+    $("roundBadge").textContent = "거래 " + Math.min(round, cfg.s3.rounds) + " / " + cfg.s3.rounds;
+    $("s3steps").innerHTML = cfg.s3.steps.map(function(q,i){
+      return '<div class="q"><span class="qno">'+(i+1)+'</span><span class="qtext" style="font-size:clamp(14px,2.8vh,33px)">'+esc(q)+'</span></div>';
+    }).join("");
     var h = "";
     for(var i=1; i<=cfg.s3.rounds; i++){
       h += '<span class="dot '+(i<round?"done":(i===round?"now":""))+'"></span>';
     }
     $("dots").innerHTML = h;
+
+    var done = round - 1, t = "";
+    for(var j=0; j<cfg.s3.rounds; j++){ t += '<span class="'+(j<done?"fill":"")+'"></span>'; }
+    $("tube").innerHTML = t;
+    $("tNow").textContent = temp() + "℃";
+  }
+  function renderS4(){
+    $("s4lead").textContent = cfg.s4.lead;
+    $("s4sub").textContent = cfg.s4.sub;
   }
   function renderTimer(){
     timeText.textContent = fmt(T.remain);
@@ -659,17 +923,19 @@
     ringFg.style.strokeDashoffset = RING_C * (1-p);
     document.body.classList.toggle("warn", T.run && warnSec() > 0 && T.remain <= warnSec()*1000);
     startBtn.textContent = T.run ? "일시정지" : (T.remain < T.total ? "이어서" : "시작");
-    timeSub.textContent = T.run
-      ? (stage===1 ? "함께 읽는 중" : stage===2 ? "장점을 쓰는 중" : "이야기 나누는 중")
+    $("timeEmoji").textContent = {1:"📖", 2:"🪞", 3:"🥕", 4:"💌"}[stage];
+    var busy = {1:"함께 읽는 중", 2:"장점을 찾는 중", 3:"장점을 거래하는 중", 4:"편지를 쓰는 중"}[stage];
+    timeSub.textContent = T.run ? busy
       : (T.remain <= 0 ? "시간이 다 되었어요" : (T.remain < T.total ? "잠깐 멈춤" : "시작을 눌러 주세요"));
   }
   function render(){
     renderStageChrome();
-    if(stage===1) renderS1(); else if(stage===2) renderS2(); else renderS3();
+    if(stage===1) renderS1(); else if(stage===2) renderS2();
+    else if(stage===3) renderS3(); else renderS4();
     renderTimer();
   }
 
-  // ---------- 타이머 엔진 ----------
+  /* ---------- 타이머 ---------- */
   var last = 0, loopId = null;
   function engine(){
     var now = Date.now(), dt = now - last; last = now;
@@ -682,10 +948,12 @@
   function startLoop(){ if(!loopId){ last = Date.now(); loopId = setInterval(engine, 100); } }
   function stopLoop(){ if(loopId){ clearInterval(loopId); loopId = null; } }
 
+  function stageSec(){ return [cfg.s1.sec, cfg.s2.sec, cfg.s3.sec, cfg.s4.sec][stage-1]; }
   function setTimer(sec){
     T.total = sec * 1000; T.remain = T.total; T.run = false; T.warned = false;
     document.body.classList.remove("warn");
   }
+  function resetTimer(){ setTimer(stageSec()); }
   function play(){
     if(T.remain <= 0) resetTimer();
     audio();
@@ -695,25 +963,23 @@
   function pause(){ T.run = false; keepAwake(false); renderTimer(); }
   function toggle(){ T.run ? pause() : play(); }
 
-  function stageSec(){
-    return stage===1 ? cfg.s1.sec : stage===2 ? cfg.s2.sec : cfg.s3.sec;
-  }
-  function resetTimer(){ setTimer(stageSec()); }
-
   function onTimeUp(){
     T.run = false; stopLoop(); keepAwake(false);
     document.body.classList.remove("warn");
-    if(stage === 3){ goMove(); return; }
+    if(stage === 3){ goChange(); return; }
     bell(); renderTimer();
   }
 
-  // ---------- 3단계 : 자리 이동 ----------
+  /* ---------- 활동2 · 체인지! ---------- */
   var moveTimer = null;
-  function goMove(){
+  function goChange(){
     stopLoop();
     if(round >= cfg.s3.rounds){ finish(); return; }
-    bell();
+    signal();
+    round++;                                  // 거래 1회 완료 → 온도 상승
+    renderS3();
     moveSub.textContent = cfg.s3.moveMsg;
+    moveTemp.textContent = "나의 장점 온도 " + temp() + "℃";
     var left = cfg.s3.move;
     moveCount.textContent = left;
     moveOverlay.classList.add("show");
@@ -725,26 +991,29 @@
       if(left <= 0){
         clearInterval(moveTimer);
         moveOverlay.classList.remove("show");
-        round++; setTimer(cfg.s3.sec); renderS3(); play();
+        setTimer(cfg.s3.sec); play();
       }
     }, 1000);
   }
   function finish(){
     stopLoop(); clearInterval(moveTimer);
+    round = cfg.s3.rounds + 1;                // 마지막 거래까지 완료
+    renderS3();
     bell(); setTimeout(bell, 700);
     keepAwake(false);
+    doneSub.textContent = "오늘 나의 장점 온도는 " + Math.min(temp(), maxTemp()) + "℃!";
     doneOverlay.classList.add("show");
-    render();
   }
 
-  // ---------- 단계 이동 ----------
+  /* ---------- 단계 이동 ---------- */
   var STEP_INFO = {
-    1:{icon:"📖", title:"1단계", sub:"동기유발 · 책 읽기"},
-    2:{icon:"📝", title:"2단계", sub:"나의 장점 쓰기"},
-    3:{icon:"🤝", title:"3단계", sub:"서로 물어보고 조사하기"}
+    1:{icon:"📖", title:"1단계", sub:"그림책 · 내가 너라서 좋아"},
+    2:{icon:"🪞", title:"활동 1", sub:"내가 나라서 좋아! · 내 안의 보물 찾기"},
+    3:{icon:"🥕", title:"활동 2", sub:"당근! 장점 거래하실래요?"},
+    4:{icon:"💌", title:"정리",   sub:"가족의 거울에 비친 나"}
   };
   function gotoStage(n, announce){
-    if(n < 1 || n > 3) return;
+    if(n < 1 || n > 4) return;
     stopLoop(); clearInterval(moveTimer);
     moveOverlay.classList.remove("show"); doneOverlay.classList.remove("show");
     T.run = false; keepAwake(false);
@@ -762,28 +1031,28 @@
     }
   }
 
-  // ---------- 버튼 ----------
+  /* ---------- 버튼 ---------- */
   startBtn.onclick = toggle;
   plusBtn.onclick  = function(){
-    var add = (stage === 3) ? 30000 : 60000;
-    T.remain += add; T.total = Math.max(T.total, T.remain); T.warned = false;
+    T.remain += (stage === 3) ? 30000 : 60000;
+    T.total = Math.max(T.total, T.remain); T.warned = false;
     document.body.classList.remove("warn"); renderTimer();
   };
-  nextBtn.onclick  = function(){ if(stage !== 3) return; T.remain = 0; T.run = false; goMove(); };
+  nextBtn.onclick  = function(){ if(stage !== 3) return; T.remain = 0; T.run = false; goChange(); };
   resetBtn.onclick = function(){
     if(stage === 3 && round > 1){
-      if(!confirm("3단계를 라운드 1부터 다시 시작할까요?")) return;
+      if(!confirm("장점 마켓을 첫 거래부터 다시 시작할까요? (장점 온도도 0℃로)")) return;
       round = 1;
     }
     stopLoop(); clearInterval(moveTimer);
     moveOverlay.classList.remove("show"); doneOverlay.classList.remove("show");
     keepAwake(false); resetTimer(); render();
   };
-  stepBtn.onclick = function(){ gotoStage(stage + 1, true); };
+  stepBtn.onclick  = function(){ gotoStage(stage + 1, true); };
   $("stepClose").onclick = function(){ stepOverlay.classList.remove("show"); play(); };
   $("doneClose").onclick = function(){ doneOverlay.classList.remove("show"); };
-  $("bankBtn").onclick   = function(){ bankOverlay.classList.add("show"); };
-  $("bankClose").onclick = function(){ bankOverlay.classList.remove("show"); };
+  $("hintBtn").onclick   = function(){ hintOverlay.classList.add("show"); };
+  $("hintClose").onclick = function(){ hintOverlay.classList.remove("show"); };
   $("fsBtn").onclick = function(){
     if(document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen().catch(function(){});
@@ -793,9 +1062,7 @@
 
   var stepEls = document.querySelectorAll(".step");
   for(var i=0; i<stepEls.length; i++){
-    (function(el){
-      el.onclick = function(){ gotoStage(parseInt(el.getAttribute("data-go"),10), false); };
-    })(stepEls[i]);
+    (function(el){ el.onclick = function(){ gotoStage(parseInt(el.getAttribute("data-go"),10), false); }; })(stepEls[i]);
   }
 
   document.addEventListener("keydown", function(e){
@@ -804,34 +1071,42 @@
     else if(e.code === "ArrowRight"){ e.preventDefault(); if(stage===3) nextBtn.click(); else stepBtn.click(); }
     else if(e.code === "ArrowLeft"){ e.preventDefault(); gotoStage(stage - 1, false); }
     else if(e.code === "ArrowUp"){ e.preventDefault(); plusBtn.click(); }
-    else if(e.key === "1" || e.key === "2" || e.key === "3"){ gotoStage(parseInt(e.key,10), false); }
+    else if("1234".indexOf(e.key) >= 0){ gotoStage(parseInt(e.key,10), false); }
+    else if(e.key === "h" || e.key === "H"){ $("hintBtn").click(); }
     else if(e.key === "f" || e.key === "F"){ $("fsBtn").click(); }
     else if(e.key === "Escape"){
-      bankOverlay.classList.remove("show");
+      hintOverlay.classList.remove("show");
       stepOverlay.classList.remove("show");
       doneOverlay.classList.remove("show");
     }
   });
 
-  // ---------- 설정 ----------
+  /* ---------- 설정 ---------- */
   function fillSetup(){
-    $("c1Sec").value   = Math.round(cfg.s1.sec/60);
-    $("c1Book").value  = cfg.s1.book;
-    $("c1Lead").value  = cfg.s1.lead;
-    $("c1Qs").value    = cfg.s1.qs.join("\n");
-    $("c2Sec").value   = Math.round(cfg.s2.sec/60);
-    $("c2Warn").value  = cfg.s2.warn;
-    $("c2Total").value = cfg.s2.total;
-    $("c2Lead").value  = cfg.s2.lead;
-    $("c3Rounds").value  = cfg.s3.rounds;
-    $("c3Sec").value     = cfg.s3.sec;
-    $("c3Warn").value    = cfg.s3.warn;
-    $("c3Move").value    = cfg.s3.move;
-    $("c3Ask").value     = cfg.s3.ask;
-    $("c3Praise").value  = cfg.s3.praise;
+    $("c1Sec").value = Math.round(cfg.s1.sec/60);
+    $("c1Book").value = cfg.s1.book;  $("c1Lead").value = cfg.s1.lead;
+    $("c1Qs").value = cfg.s1.qs.join("\n"); $("c1Goal").value = cfg.s1.goal;
+
+    $("c2Sec").value = Math.round(cfg.s2.sec/60);
+    $("c2Warn").value = cfg.s2.warn;  $("c2Total").value = cfg.s2.total;
+    $("c2Cards").value = cfg.s2.cards; $("c2Lead").value = cfg.s2.lead;
+
+    $("c3Rounds").value = cfg.s3.rounds; $("c3Sec").value = cfg.s3.sec;
+    $("c3Warn").value = cfg.s3.warn;     $("c3Move").value = cfg.s3.move;
+    $("c3Step").value = cfg.s3.step;
+    $("c3Steps").value = cfg.s3.steps.join("\n");
     $("c3MoveMsg").value = cfg.s3.moveMsg;
-    $("cWords").value = cfg.words.join(", ");
+
+    $("c4Sec").value = Math.round(cfg.s4.sec/60);
+    $("c4Lead").value = cfg.s4.lead; $("c4Sub").value = cfg.s4.sub;
+
+    for(var c=0; c<4; c++) $("h"+c).value = cfg.hints[c].join("\n");
     $("cSound").checked = !!cfg.sound;
+    $("cSignal").value = cfg.signal;
+    $("cSignalText").value = cfg.signalText;
+    $("soundFileInfo").textContent = cfg.customSound
+      ? "넣어둔 소리 파일이 있습니다 (약 " + Math.round(cfg.customSound.length/1400) + "KB)"
+      : "아직 넣은 파일이 없습니다.";
   }
   function num(id, min, max, fb){
     var v = parseInt($(id).value, 10);
@@ -843,6 +1118,34 @@
               .filter(function(s){ return s.length > 0; });
     return a.length ? a : fb;
   }
+  $("cSignalTest").onclick = function(){
+    var keep = cfg.sound, ks = cfg.signal, kt = cfg.signalText;
+    cfg.sound = true; cfg.signal = $("cSignal").value; cfg.signalText = $("cSignalText").value.trim() || "당근왔숑!";
+    signal();
+    cfg.sound = keep; cfg.signal = ks; cfg.signalText = kt;
+  };
+  $("cSoundClear").onclick = function(){
+    cfg.customSound = ""; customAudio = null;
+    $("cSoundFile").value = "";
+    $("soundFileInfo").textContent = "아직 넣은 파일이 없습니다.";
+  };
+  $("cSoundFile").onchange = function(){
+    var f = this.files && this.files[0];
+    if(!f) return;
+    if(f.size > 2 * 1024 * 1024){
+      $("soundFileInfo").textContent = "파일이 너무 큽니다 (2MB 이하만 넣을 수 있어요).";
+      this.value = ""; return;
+    }
+    var r = new FileReader();
+    r.onload = function(){
+      cfg.customSound = String(r.result);
+      customAudio = null;
+      $("cSignal").value = "custom";
+      $("soundFileInfo").textContent = f.name + " — 넣었습니다. 「들어보기」로 확인해 보세요.";
+    };
+    r.onerror = function(){ $("soundFileInfo").textContent = "파일을 읽지 못했습니다."; };
+    r.readAsDataURL(f);
+  };
   $("setupBtn").onclick = function(){ if(T.run) pause(); fillSetup(); setup.classList.add("show"); setup.scrollTop = 0; };
   $("cfgDefault").onclick = function(){ cfg = JSON.parse(JSON.stringify(DEFAULTS)); fillSetup(); };
   $("cfgSave").onclick = function(){
@@ -850,33 +1153,42 @@
     cfg.s1.book = $("c1Book").value.trim();
     cfg.s1.lead = txt("c1Lead", DEFAULTS.s1.lead);
     cfg.s1.qs   = lines("c1Qs", DEFAULTS.s1.qs.slice());
+    cfg.s1.goal = txt("c1Goal", DEFAULTS.s1.goal);
 
-    cfg.s2.sec   = num("c2Sec", 1, 60, 5) * 60;
+    cfg.s2.sec   = num("c2Sec", 1, 60, 8) * 60;
     cfg.s2.warn  = num("c2Warn", 0, 120, 30);
     cfg.s2.total = num("c2Total", 1, 60, 24);
+    cfg.s2.cards = num("c2Cards", 1, 10, 4);
     cfg.s2.lead  = txt("c2Lead", DEFAULTS.s2.lead);
 
     cfg.s3.rounds  = num("c3Rounds", 1, 30, 10);
-    cfg.s3.sec     = num("c3Sec", 10, 900, 120);
-    cfg.s3.warn    = num("c3Warn", 0, 120, 20);
+    cfg.s3.sec     = num("c3Sec", 10, 900, 90);
+    cfg.s3.warn    = num("c3Warn", 0, 120, 15);
     cfg.s3.move    = num("c3Move", 3, 60, 8);
-    cfg.s3.ask     = txt("c3Ask", DEFAULTS.s3.ask);
-    cfg.s3.praise  = txt("c3Praise", DEFAULTS.s3.praise);
+    cfg.s3.step    = num("c3Step", 1, 50, 10);
+    cfg.s3.steps   = lines("c3Steps", DEFAULTS.s3.steps.slice());
     cfg.s3.moveMsg = txt("c3MoveMsg", DEFAULTS.s3.moveMsg);
 
-    var ws = $("cWords").value.split(/[,\n]/).map(function(s){ return s.trim(); })
-                .filter(function(s){ return s.length > 0; });
-    cfg.words = ws.length ? ws : DEFAULTS.words.slice();
+    cfg.s4.sec  = num("c4Sec", 1, 60, 5) * 60;
+    cfg.s4.lead = txt("c4Lead", DEFAULTS.s4.lead);
+    cfg.s4.sub  = txt("c4Sub", DEFAULTS.s4.sub);
+
+    for(var c=0; c<4; c++) cfg.hints[c] = lines("h"+c, HINT_DEFAULT[c].slice());
     cfg.sound = $("cSound").checked;
+    cfg.signal = $("cSignal").value;
+    cfg.signalText = txt("cSignalText", "당근왔숑!");
 
     saveCfg();
     setup.classList.remove("show");
     if(doneCount > cfg.s2.total) doneCount = cfg.s2.total;
-    renderWords(); resetTimer(); render();
+    if(round > cfg.s3.rounds + 1) round = 1;
+    renderHints(); resetTimer(); render();
   };
 
-  // ---------- 시작 ----------
-  renderWords();
+  /* ---------- 시작 ---------- */
+  renderHints();
   gotoStage(1, false);
 })();
-</script></body></html>
+</script>
+</body>
+</html>
