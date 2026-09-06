@@ -107,8 +107,21 @@
     max-width:100%; max-height:100%; border-radius:18px; border:5px solid #fff;
     box-shadow:0 14px 40px rgba(150,110,70,.22); display:block; object-fit:contain; cursor:zoom-in;
   }
-  /* 활동 슬라이드 : 그림 절반 + 활동 절반 */
-  .slide.split .shot{flex:0 1 auto; width:50%; max-width:50%; height:auto}
+  /* 활동 슬라이드 : 그림 + 손잡이 + 활동 패널 (비율은 끌어서 조절) */
+  .slide.split .shot{flex:0 0 auto; height:auto}
+  .handle{
+    flex:0 0 auto; align-self:stretch; width:clamp(14px,1.3vw,22px);
+    display:flex; align-items:center; justify-content:center;
+    cursor:col-resize; border-radius:999px; background:transparent;
+    transition:background .15s; touch-action:none;
+  }
+  .handle::before{
+    content:""; width:6px; height:clamp(50px,18vh,140px); border-radius:999px;
+    background:var(--line); box-shadow:0 2px 0 rgba(180,140,100,.18); transition:background .15s, height .15s;
+  }
+  .handle:hover::before, .handle.drag::before{background:var(--theme); height:clamp(70px,26vh,200px)}
+  .handle:hover{background:var(--theme-soft)}
+  body.resizing{cursor:col-resize; user-select:none}
   .slide.split .actpanel{
     flex:1 1 0; min-width:0; height:100%;
     background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
@@ -342,7 +355,8 @@
     .step.on .stitle{display:inline}
     .icon-btn{font-size:clamp(10px,2.6vw,13px); padding:.4em .5em; border-radius:10px}
     .slide{flex-direction:column; gap:8px}
-    .slide.split .shot{width:auto; max-width:100%; max-height:34vh; flex:0 0 auto}
+    .slide.split .shot{width:auto !important; max-width:100% !important; max-height:34vh; flex:0 0 auto}
+    .handle{display:none}
     .slide.split .actpanel{height:auto; flex:1 1 auto; width:100%; padding:11px 13px}
     .lead{font-size:clamp(16px,4.4vw,26px)}
     .q .qtext{font-size:clamp(13px,3.7vw,20px)}
@@ -390,6 +404,7 @@
   <div class="stagearea">
     <div class="slide" id="slide">
       <img class="shot" id="shot" src="img/intro.jpg" alt="수업 자료">
+      <div class="handle" id="handle" title="끌어서 그림 크기를 조절하세요" hidden></div>
 
       <!-- 그림책 읽기 -->
       <div class="actpanel" id="actBook" hidden>
@@ -607,7 +622,8 @@
     <div class="tip">
       <b>활동 2 자리 배치</b> — 책상을 두 줄로 마주 보게 놓고, <b>안쪽 줄은 그대로</b>, <b>바깥줄만 오른쪽으로 한 칸</b> 옮기면 됩니다.
       맨 끝 학생은 반대쪽 끝으로. 이렇게 하면 <b>학급 인원의 절반만큼</b> 거래했을 때 모두가 서로 한 번씩 만납니다.<br>
-      <b>넘기기</b> — 스페이스·엔터·오른쪽 화살표로 다음 슬라이드, 왼쪽 화살표로 이전. 숫자 <b>1·2·3·4</b>는 각 단계 첫 화면으로 점프합니다.
+      <b>넘기기</b> — 스페이스·엔터·오른쪽 화살표로 다음 슬라이드, 왼쪽 화살표로 이전. 숫자 <b>1·2·3·4</b>는 각 단계 첫 화면으로 점프합니다.<br>
+      <b>화면 비율</b> — 활동 화면에서 그림과 활동 패널 사이의 <b>손잡이를 좌우로 끌면</b> 비율이 바뀝니다. 활동마다 따로 기억되고, 손잡이를 <b>두 번 클릭</b>하면 반반으로 돌아갑니다.
     </div>
 
     <div class="setup-actions">
@@ -664,6 +680,7 @@
     sound:true, signal:"youtube", signalText:"당근왔숑!", customSound:"",
     yt:{ id:"FtGC_nRpbTk", start:0, dur:4, show:false },
     hints:JSON.parse(JSON.stringify(HINT_DEFAULT)),
+    split:{ book:50, write:50, market:50, letter:50 },   // 활동별 그림 폭(%)
     s1:{ sec:600, book:"내가 너라서 좋아", lead:"그림책을 함께 읽어 봅시다",
          qs:["거울 속의 내가 주인공에게 해준 말 중 가장 기억에 남는 말은 무엇인가요?",
              "거울이 여러분에게 말을 해준다면, 여러분은 어떤 말을 듣고 싶나요?"],
@@ -997,6 +1014,8 @@
 
     for(var k in PANELS) $(PANELS[k]).hidden = (s.act !== k);
     slideEl.className = "slide" + (s.act ? " split" : "");
+    $("handle").hidden = !s.act;
+    applySplit();
 
     if(s.act === "book") renderBook();
     else if(s.act === "write") renderWrite();
@@ -1010,6 +1029,54 @@
 
     renderTimer();
   }
+  /* 그림 / 활동 패널 비율 : 손잡이를 끌어 조절, 활동마다 따로 기억 */
+  function splitPct(){
+    var a = cur().act;
+    var v = a && cfg.split ? Number(cfg.split[a]) : 50;
+    return (isFinite(v) && v >= 20 && v <= 78) ? v : 50;
+  }
+  function applySplit(){
+    if(!cur().act){ shot.style.width = ""; shot.style.maxWidth = ""; return; }
+    var pct = splitPct();
+    shot.style.width = pct + "%";
+    shot.style.maxWidth = pct + "%";
+  }
+  (function initHandle(){
+    var handle = $("handle"), dragging = false;
+    function pctFromX(clientX){
+      var r = slideEl.getBoundingClientRect();
+      if(!r.width) return splitPct();
+      return Math.max(20, Math.min(78, (clientX - r.left) / r.width * 100));
+    }
+    handle.addEventListener("pointerdown", function(e){
+      if(!cur().act) return;
+      dragging = true;
+      handle.classList.add("drag");
+      document.body.classList.add("resizing");
+      try{ handle.setPointerCapture(e.pointerId); }catch(err){}
+      e.preventDefault();
+    });
+    handle.addEventListener("pointermove", function(e){
+      if(!dragging) return;
+      cfg.split[cur().act] = Math.round(pctFromX(e.clientX));
+      applySplit();
+    });
+    function end(){
+      if(!dragging) return;
+      dragging = false;
+      handle.classList.remove("drag");
+      document.body.classList.remove("resizing");
+      saveCfg();
+    }
+    handle.addEventListener("pointerup", end);
+    handle.addEventListener("pointercancel", end);
+    // 더블클릭하면 반반으로
+    handle.addEventListener("dblclick", function(){
+      if(!cur().act) return;
+      cfg.split[cur().act] = 50; applySplit(); saveCfg();
+    });
+  })();
+
   function go(i){
     if(i < 0 || i >= DECK.length) return;
     // 슬라이드를 떠날 때 타이머 정지
