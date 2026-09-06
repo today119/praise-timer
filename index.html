@@ -311,6 +311,18 @@
     font-size:clamp(17px,3.2vh,40px); font-weight:900;
     background:rgba(255,255,255,.25); border-radius:999px; padding:.25em 1.1em;
   }
+  /* 유튜브 신호음 플레이어 : display:none 이면 유튜브가 재생을 막으므로 항상 렌더하되 숨김 */
+  .yt-box{
+    position:fixed; right:14px; bottom:14px; z-index:60;
+    width:clamp(200px,22vw,300px); aspect-ratio:16/9; border-radius:16px; overflow:hidden;
+    border:4px solid rgba(255,255,255,.9); box-shadow:0 10px 30px rgba(0,0,0,.3); background:#000;
+    opacity:0; pointer-events:none; transform:translateY(8px) scale(.96);
+    transition:opacity .25s, transform .25s;
+  }
+  .yt-box.on{opacity:1; transform:none}
+  .yt-box iframe{width:100%; height:100%; display:block; border:0}
+  #ytPreview{width:clamp(200px,22vw,300px); aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:3px solid var(--line); background:#000; margin-top:.5em}
+  #ytPreview iframe{width:100%; height:100%; border:0; display:block}
   #doneOverlay{background:linear-gradient(160deg,#14B8A6,#5EEAD4)}
   #doneOverlay *{color:#fff}
   #stepOverlay{background:linear-gradient(160deg,#8B5CF6,#A78BFA)}
@@ -458,6 +470,7 @@
 <body data-stage="1">
 <div class="torn t"></div>
 <div class="torn b"></div>
+<div class="yt-box" id="ytWrap"><div id="ytBox"></div></div>
 <div id="app">
   <div class="top">
     <div class="steps" id="steps">
@@ -685,7 +698,8 @@
       <div>
         <label for="cSignal">「당근왔숑!」 신호음</label>
         <select id="cSignal" style="width:100%; font-family:inherit; font-size:clamp(13px,1.8vh,18px); font-weight:600; padding:.6em .8em; border:2px solid var(--line); border-radius:12px; background:#FFFDFB; color:var(--ink)">
-          <option value="voice">음성으로 말하기 (추천)</option>
+          <option value="youtube">유튜브 영상 재생 (당근 알림음)</option>
+          <option value="voice">음성으로 말하기</option>
           <option value="chime">당근 차임 (딩동)</option>
           <option value="bell">종소리</option>
           <option value="custom">내가 넣은 소리 파일</option>
@@ -695,6 +709,21 @@
         <label for="cSignalText">음성으로 말할 내용</label>
         <input type="text" id="cSignalText" placeholder="당근왔숑!">
       </div>
+    </div>
+    <div class="row grid2">
+      <div>
+        <label for="cYtId">유튜브 주소 또는 영상 ID</label>
+        <input type="text" id="cYtId" placeholder="https://youtu.be/FtGC_nRpbTk">
+        <div class="hint" id="ytInfo" style="color:var(--sub); font-size:clamp(11px,1.5vh,15px); font-weight:700; margin-top:.4em"></div>
+      </div>
+      <div class="grid">
+        <div><label for="cYtStart">시작 시간(초)</label><input type="number" id="cYtStart" min="0" max="3600" value="0"></div>
+        <div><label for="cYtDur">재생 길이(초)</label><input type="number" id="cYtDur" min="1" max="30" value="4"></div>
+      </div>
+    </div>
+    <div class="row">
+      <label>영상에서 쓸 부분 찾기 <span style="font-weight:600;color:var(--sub)">(들어보며 「시작 시간」을 맞추세요)</span></label>
+      <div id="ytPreview"></div>
     </div>
     <div class="row grid2">
       <div>
@@ -759,7 +788,8 @@
   ];
 
   var DEFAULTS = {
-    sound:true, signal:"voice", signalText:"당근왔숑!", customSound:"",
+    sound:true, signal:"youtube", signalText:"당근왔숑!", customSound:"",
+    yt:{ id:"FtGC_nRpbTk", start:0, dur:4 },
     hints:JSON.parse(JSON.stringify(HINT_DEFAULT)),
     s1:{ sec:600, book:"내가 너라서 좋아", lead:"그림책을 함께 읽어 봅시다",
          qs:["거울 속의 내가 주인공에게 해준 말 중 가장 기억에 남는 말은 무엇인가요?",
@@ -862,6 +892,53 @@
       return true;
     }catch(e){ return false; }
   }
+  /* ---------- 유튜브 신호음 (공식 임베드 플레이어) ---------- */
+  var ytPlayer = null, ytReady = false, ytStopTimer = null, ytBroken = false;
+  function ytVideoId(v){
+    v = String(v || "").trim();
+    var m = v.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
+    if(m) return m[1];
+    return /^[A-Za-z0-9_-]{11}$/.test(v) ? v : "";
+  }
+  function loadYTApi(){
+    if(window.YT && window.YT.Player){ makeYTPlayer(); return; }
+    if(document.getElementById("ytapi")) return;
+    var t = document.createElement("script");
+    t.id = "ytapi"; t.src = "https://www.youtube.com/iframe_api";
+    t.onerror = function(){ ytBroken = true; };
+    document.head.appendChild(t);
+  }
+  window.onYouTubeIframeAPIReady = function(){ makeYTPlayer(); };
+  function makeYTPlayer(){
+    if(ytPlayer || !window.YT || !window.YT.Player) return;
+    var id = ytVideoId(cfg.yt.id);
+    if(!id){ ytBroken = true; return; }
+    try{
+      ytPlayer = new YT.Player("ytBox", {
+        videoId:id, host:"https://www.youtube-nocookie.com",
+        playerVars:{ controls:0, disablekb:1, modestbranding:1, rel:0, playsinline:1, fs:0 },
+        events:{
+          onReady: function(){ ytReady = true; try{ ytPlayer.setVolume(100); }catch(e){} },
+          onError: function(){ ytBroken = true; ytReady = false; }
+        }
+      });
+    }catch(e){ ytBroken = true; }
+  }
+  function playYT(){
+    if(ytBroken || !ytReady || !ytPlayer) return false;
+    try{
+      $("ytWrap").classList.add("on");
+      ytPlayer.unMute(); ytPlayer.setVolume(100);
+      ytPlayer.seekTo(Number(cfg.yt.start) || 0, true);
+      ytPlayer.playVideo();
+      clearTimeout(ytStopTimer);
+      ytStopTimer = setTimeout(function(){
+        try{ ytPlayer.pauseVideo(); }catch(e){}
+      }, Math.max(1, Number(cfg.yt.dur) || 4) * 1000);
+      return true;
+    }catch(e){ return false; }
+  }
+
   var customAudio = null;
   function playCustom(){
     try{
@@ -878,6 +955,11 @@
   /* 「당근왔숑!」 신호 : 설정에 따라 */
   function signal(){
     if(!cfg.sound) return;
+    if(cfg.signal === "youtube"){
+      if(playYT()) return;
+      carrotChime();                 // 유튜브가 막혔거나 아직 준비 안 됐을 때
+      return;
+    }
     if(cfg.signal === "custom" && playCustom()) return;
     if(cfg.signal === "voice"){ carrotChime(); if(speakSignal()) return; return; }
     if(cfg.signal === "bell"){ bell(); return; }
@@ -1056,6 +1138,8 @@
       if(left <= 0){
         clearInterval(moveTimer);
         moveOverlay.classList.remove("show");
+        $("ytWrap").classList.remove("on");
+        try{ if(ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo(); }catch(e){}
         setTimer(cfg.s3.sec); play();
       }
     }, 1000);
@@ -1198,6 +1282,18 @@
     $("cSound").checked = !!cfg.sound;
     $("cSignal").value = cfg.signal;
     $("cSignalText").value = cfg.signalText;
+    $("cYtId").value = cfg.yt.id;
+    $("cYtStart").value = cfg.yt.start;
+    $("cYtDur").value = cfg.yt.dur;
+    $("ytInfo").textContent = ytBroken
+      ? "유튜브를 불러오지 못했습니다. 학교 인터넷이 막았을 수 있어요 — 다른 신호음을 고르세요."
+      : (ytReady ? "영상 준비됨 ✓" : "영상 불러오는 중…");
+    var pv = $("ytPreview"), vid = ytVideoId(cfg.yt.id);
+    if(vid && pv.getAttribute("data-v") !== vid){
+      pv.setAttribute("data-v", vid);
+      pv.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + vid
+                   + '" title="신호음 영상" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+    }
     $("soundFileInfo").textContent = cfg.customSound
       ? "넣어둔 소리 파일이 있습니다 (약 " + Math.round(cfg.customSound.length/1400) + "KB)"
       : "아직 넣은 파일이 없습니다.";
@@ -1213,10 +1309,19 @@
     return a.length ? a : fb;
   }
   $("cSignalTest").onclick = function(){
-    var keep = cfg.sound, ks = cfg.signal, kt = cfg.signalText;
-    cfg.sound = true; cfg.signal = $("cSignal").value; cfg.signalText = $("cSignalText").value.trim() || "당근왔숑!";
+    var keep = cfg.sound, ks = cfg.signal, kt = cfg.signalText, ky = JSON.parse(JSON.stringify(cfg.yt));
+    cfg.sound = true;
+    cfg.signal = $("cSignal").value;
+    cfg.signalText = $("cSignalText").value.trim() || "당근왔숑!";
+    cfg.yt.id    = ytVideoId($("cYtId").value) || cfg.yt.id;
+    cfg.yt.start = num("cYtStart", 0, 3600, 0);
+    cfg.yt.dur   = num("cYtDur", 1, 30, 4);
     signal();
-    cfg.sound = keep; cfg.signal = ks; cfg.signalText = kt;
+    if(cfg.signal === "youtube"){
+      setTimeout(function(){ $("ytWrap").classList.remove("on"); },
+                 (Number(cfg.yt.dur) || 4) * 1000 + 400);
+    }
+    cfg.sound = keep; cfg.signal = ks; cfg.signalText = kt; cfg.yt = ky;
   };
   $("cSoundClear").onclick = function(){
     cfg.customSound = ""; customAudio = null;
@@ -1271,6 +1376,14 @@
     cfg.sound = $("cSound").checked;
     cfg.signal = $("cSignal").value;
     cfg.signalText = txt("cSignalText", "당근왔숑!");
+    var newId = ytVideoId($("cYtId").value) || DEFAULTS.yt.id;
+    var idChanged = (ytVideoId(cfg.yt.id) !== newId);
+    cfg.yt.id    = newId;
+    cfg.yt.start = num("cYtStart", 0, 3600, 0);
+    cfg.yt.dur   = num("cYtDur", 1, 30, 4);
+    if(idChanged && ytPlayer && ytPlayer.loadVideoById){
+      try{ ytPlayer.cueVideoById(newId); ytBroken = false; }catch(e){}
+    }
 
     saveCfg();
     setup.classList.remove("show");
@@ -1282,6 +1395,7 @@
   /* ---------- 시작 ---------- */
   renderHints();
   gotoStage(1, false);
+  loadYTApi();
 })();
 </script>
 </body>
