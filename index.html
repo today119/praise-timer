@@ -439,6 +439,7 @@
 <div class="torn t"></div>
 <div class="torn b"></div>
 <div class="yt-box" id="ytWrap"><div id="ytBox"></div></div>
+<div class="yt-box" id="bgmWrap"><div id="bgmBox"></div></div>
 
 <div id="app">
   <div class="top">
@@ -474,6 +475,7 @@
           <span id="bkNo">1 / 1</span>
           <button id="bkNext" title="다음장">▶</button>
           <button id="bkFull" class="wide">🔍 크게 보기</button>
+          <button id="bgmBtn" class="wide" hidden>🎹 음악 켜기</button>
         </div>
       </div>
 
@@ -522,17 +524,6 @@
       </div>
 
       <!-- 정리 : 편지 쓰기 -->
-      <div class="actpanel" id="actLetter" hidden>
-        <div class="badge-top">💌 정리</div>
-        <div class="lead" id="s4lead">가족의 거울에 비친 나</div>
-        <div class="sublead" id="s4sub">오늘 발견한 나의 장점을 가족에게 편지로 전해 봅시다</div>
-        <div class="mirrors">
-          <div class="mir a"><span class="mi">🪞</span><span class="mt">내가<br>바라본 나</span></div>
-          <div class="mir b"><span class="mi">🌟</span><span class="mt">친구가<br>바라본 나</span></div>
-          <div class="mir c"><span class="mi">🍀</span><span class="mt">가족이<br>바라본 나</span></div>
-        </div>
-        <div class="goal">다양한 모습의 나, <b>모두 소중해!</b><br>있는 그대로 너는 멋져 ♡</div>
-      </div>
     </div>
   </div>
 
@@ -621,6 +612,13 @@
         <button class="mini-btn" id="bookClear">기본 그림책으로</button>
         <span class="bookstat" id="bookStat">아직 없어요</span>
       </div>
+      <div class="bookfile">
+        <span class="bookstat">🎹 배경음악(유튜브 주소)</span>
+        <input type="text" id="cBgm" placeholder="비워두면 안 나와요" style="flex:1;min-width:12em">
+        <span class="bookstat">소리 크기</span>
+        <input type="range" id="cBgmVol" min="0" max="100" step="5" style="width:9em">
+        <span class="bookstat" id="cBgmVolNo">20</span>
+      </div>
       <div class="bookfile" id="bookRangeRow" hidden>
         <span class="bookstat">읽어줄 쪽만 고르기</span>
         <input type="number" id="c1BookFrom" min="1" style="width:5.5em">
@@ -693,8 +691,6 @@
     <div class="grid">
       <div><label for="c4Sec">정리 시간(분)</label><input type="number" id="c4Sec" min="1" max="60" value="5"></div>
     </div>
-    <div class="row"><label for="c4Lead">안내 문구</label><input type="text" id="c4Lead"></div>
-    <div class="row"><label for="c4Sub">보조 문구</label><input type="text" id="c4Sub"></div>
 
     <div class="sec-title"><span class="no" style="background:var(--sub)">＋</span>장점 힌트 카드</div>
     <div class="grid2">
@@ -768,7 +764,7 @@
   ];
 
   var DEFAULTS = {
-    song:"",
+    song:"", bgm:"", bgmVol:20,
     sound:true, signal:"youtube", signalText:"당근왔숑!", customSound:"",
     yt:{ id:"FtGC_nRpbTk", start:0, dur:4, show:false },
     hints:JSON.parse(JSON.stringify(HINT_DEFAULT)),
@@ -894,7 +890,7 @@
     t.onerror = function(){ ytBroken = true; };
     document.head.appendChild(t);
   }
-  window.onYouTubeIframeAPIReady = function(){ makeYTPlayer(); };
+  window.onYouTubeIframeAPIReady = function(){ makeYTPlayer(); makeBgm(); if(bgmWant) bgmPlay(); };
   function makeYTPlayer(){
     if(ytPlayer || !window.YT || !window.YT.Player) return;
     var id = ytVideoId(cfg.yt.id);
@@ -910,6 +906,51 @@
       });
     }catch(e){ ytBroken = true; }
   }
+  /* ================= 그림책 배경음악 (유튜브) ================= */
+  var bgmPlayer = null, bgmReady = false, bgmWant = false, bgmOn = true;
+  function bgmId(){ return ytVideoId(cfg.bgm); }
+  function makeBgm(){
+    if(bgmPlayer || !window.YT || !window.YT.Player) return;
+    var id = bgmId();
+    if(!id) return;
+    try{
+      bgmPlayer = new YT.Player("bgmBox", {
+        videoId:id, host:"https://www.youtube-nocookie.com",
+        playerVars:{ controls:0, disablekb:1, modestbranding:1, rel:0, playsinline:1, fs:0, loop:1, playlist:id },
+        events:{
+          onReady:function(){
+            bgmReady = true;
+            try{ bgmPlayer.setVolume(Number(cfg.bgmVol) || 20); }catch(e){}
+            if(bgmWant) bgmPlay();
+          },
+          onStateChange:function(e){                 /* 끝나면 처음부터 다시 */
+            if(e.data === YT.PlayerState.ENDED && bgmWant){
+              try{ bgmPlayer.seekTo(0, true); bgmPlayer.playVideo(); }catch(err){}
+            }
+          }
+        }
+      });
+    }catch(e){}
+  }
+  function bgmPlay(){
+    if(!bgmReady || !bgmPlayer) return;
+    try{ bgmPlayer.unMute(); bgmPlayer.setVolume(Number(cfg.bgmVol) || 20); bgmPlayer.playVideo(); }catch(e){}
+  }
+  function bgmStop(){
+    try{ if(bgmPlayer && bgmReady) bgmPlayer.pauseVideo(); }catch(e){}
+  }
+  /* 그림책 슬라이드에서만 흐르게 한다 */
+  function syncBgm(){
+    var want = bgmOn && !!bgmId() && cur().act === "book";
+    var btn = $("bgmBtn");
+    btn.hidden = !bgmId();
+    btn.textContent = bgmOn ? "🎹 음악 끄기" : "🎹 음악 켜기";
+    if(want === bgmWant) return;
+    bgmWant = want;
+    if(want){ if(!bgmPlayer){ loadYTApi(); makeBgm(); } bgmPlay(); }
+    else bgmStop();
+  }
+
   function playYT(){
     if(ytBroken || !ytReady || !ytPlayer) return false;
     try{
@@ -1009,10 +1050,6 @@
     for(var j=0; j<cfg.s3.rounds; j++) t += '<span class="'+(j<done?"fill":"")+'"></span>';
     $("tube").innerHTML = t;
     $("tNow").textContent = temp() + "℃";
-  }
-  function renderLetter(){
-    $("s4lead").textContent = cfg.s4.lead;
-    $("s4sub").textContent = cfg.s4.sub;
   }
 
   /* ================= 타이머 ================= */
@@ -1323,7 +1360,9 @@
   }
 
   /* ================= 슬라이드 이동 ================= */
-  var PANELS = {book:"actBook", write:"actWrite", market:"actMarket", letter:"actLetter"};
+  /* letter 는 패널 없이 그림만 크게 보여준다(타이머는 그대로) */
+  var PANELS = {book:"actBook", write:"actWrite", market:"actMarket"};
+  function hasPanel(a){ return !!(a && PANELS[a]); }
   function render(){
     var s = cur();
     document.body.setAttribute("data-stage", String(s.stage));
@@ -1347,14 +1386,13 @@
     if($("songFrame").getAttribute("src") !== want) $("songFrame").setAttribute("src", want);
 
     for(var k in PANELS) $(PANELS[k]).hidden = (s.act !== k);
-    slideEl.className = "slide" + (s.act ? " split" : "");
-    $("handle").hidden = !s.act;
+    slideEl.className = "slide" + (hasPanel(s.act) ? " split" : "");
+    $("handle").hidden = !hasPanel(s.act);
     applySplit();
 
     if(s.act === "book"){ renderBook(); renderBookNav(); }
     else if(s.act === "write") renderWrite();
     else if(s.act === "market") renderMarket();
-    else if(s.act === "letter") renderLetter();
 
     $("changeBtn").hidden = (s.act !== "market");
     $("prevBtn").disabled = (idx === 0);
@@ -1362,6 +1400,7 @@
     $("slideNo").textContent = (idx + 1) + " / " + DECK.length;
 
     renderTimer();
+    syncBgm();
   }
   /* 그림 / 활동 패널 비율 : 손잡이를 끌어 조절, 활동마다 따로 기억 */
   function splitPct(){
@@ -1370,7 +1409,7 @@
     return (isFinite(v) && v >= 20 && v <= 78) ? v : 50;
   }
   function applySplit(){
-    if(!cur().act){ shot.style.width = ""; shot.style.maxWidth = ""; return; }
+    if(!hasPanel(cur().act)){ shot.style.width = ""; shot.style.maxWidth = ""; return; }
     var pct = splitPct();
     shot.style.width = pct + "%";
     shot.style.maxWidth = pct + "%";
@@ -1488,6 +1527,10 @@
   }
 
   /* 그림책 버튼 연결 */
+  $("cBgmVol").addEventListener("input", function(){
+    $("cBgmVolNo").textContent = $("cBgmVol").value;
+    try{ if(bgmPlayer && bgmReady) bgmPlayer.setVolume(Number($("cBgmVol").value)); }catch(e){}
+  });
   $("bookPick").addEventListener("click", function(){ $("bookFile").click(); });
   $("bookFile").addEventListener("change", function(e){ pickBook(e.target.files); e.target.value=""; });
   $("bookClear").addEventListener("click", function(){
@@ -1501,6 +1544,10 @@
   $("bkPrev").addEventListener("click", function(){ bookGo(bookIdx - 1); });
   $("bkNext").addEventListener("click", function(){ bookGo(bookIdx + 1); });
   $("bkFull").addEventListener("click", openBookView);
+  $("bgmBtn").addEventListener("click", function(){
+    bgmOn = !bgmOn;
+    syncBgm();
+  });
   shot.addEventListener("click", function(){ if(cur().act === "book" && bookCount()) openBookView(); });
   $("bvPrev").addEventListener("click", function(){ bookGo(bookIdx - 1); });
   $("bvNext").addEventListener("click", function(){ bookGo(bookIdx + 1); });
@@ -1539,6 +1586,9 @@
     $("cSong").value = cfg.song || "";
     $("c1Sec").value = Math.round(cfg.s1.sec/60);
     $("c1Book").value = cfg.s1.book;
+    $("cBgm").value = cfg.bgm || "";
+    $("cBgmVol").value = Number(cfg.bgmVol) || 20;
+    $("cBgmVolNo").textContent = Number(cfg.bgmVol) || 20;
     $("c1BookFrom").value = Number(cfg.s1.bookFrom) || (BOOK.length ? 1 : "");
     $("c1BookTo").value   = Number(cfg.s1.bookTo)   || (BOOK.length ? BOOK.length : "");
     bookStat();
@@ -1549,7 +1599,6 @@
     $("c3Warn").value = cfg.s3.warn; $("c3Move").value = cfg.s3.move;
     $("c3Step").value = cfg.s3.step; $("c3MoveMsg").value = cfg.s3.moveMsg;
     $("c4Sec").value = Math.round(cfg.s4.sec/60);
-    $("c4Lead").value = cfg.s4.lead; $("c4Sub").value = cfg.s4.sub;
     for(var c=0; c<4; c++) $("h"+c).value = cfg.hints[c].join("\n");
     $("cSound").checked = !!cfg.sound;
     $("cSignal").value = cfg.signal; $("cSignalText").value = cfg.signalText;
@@ -1582,6 +1631,16 @@
   $("cfgDefault").onclick = function(){ cfg = JSON.parse(JSON.stringify(DEFAULTS)); fillSetup(); };
   $("cfgSave").onclick = function(){
     cfg.song = $("cSong").value.trim();
+    var bgmBefore = bgmId();
+    cfg.bgm = $("cBgm").value.trim();
+    cfg.bgmVol = num("cBgmVol", 0, 100, 20);
+    if(bgmId() !== bgmBefore){                       /* 곡이 바뀌면 플레이어를 새로 */
+      try{ if(bgmPlayer && bgmPlayer.destroy) bgmPlayer.destroy(); }catch(e){}
+      bgmPlayer = null; bgmReady = false; bgmWant = false;
+      $("bgmBox").innerHTML = "";
+    }else{
+      try{ if(bgmPlayer && bgmReady) bgmPlayer.setVolume(Number(cfg.bgmVol) || 20); }catch(e){}
+    }
     cfg.s1.sec = num("c1Sec",1,60,10)*60; cfg.s1.book = $("c1Book").value.trim();
     var bf = Math.max(0, parseInt($("c1BookFrom").value, 10) || 0);
     var bt = Math.max(0, parseInt($("c1BookTo").value, 10) || 0);
@@ -1596,7 +1655,6 @@
     cfg.s3.warn = num("c3Warn",0,120,15); cfg.s3.move = num("c3Move",3,60,8);
     cfg.s3.step = num("c3Step",1,50,10); cfg.s3.moveMsg = txt("c3MoveMsg", DEFAULTS.s3.moveMsg);
     cfg.s4.sec = num("c4Sec",1,60,5)*60;
-    cfg.s4.lead = txt("c4Lead", DEFAULTS.s4.lead); cfg.s4.sub = txt("c4Sub", DEFAULTS.s4.sub);
     for(var c=0; c<4; c++) cfg.hints[c] = lines("h"+c, HINT_DEFAULT[c].slice());
     cfg.sound = $("cSound").checked;
     cfg.signal = $("cSignal").value;
