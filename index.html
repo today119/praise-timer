@@ -620,11 +620,11 @@
     <div class="row"><label for="c1Qs">발문 <span style="font-weight:600;color:var(--sub)">(한 줄에 하나씩)</span></label><textarea id="c1Qs"></textarea></div>
     <div class="row"><label for="c1Goal">학습 목표</label><input type="text" id="c1Goal"></div>
     <div class="row">
-      <label>그림책 파일 <span style="font-weight:600;color:var(--sub)">(이 컴퓨터에만 저장돼요 · 인터넷에 올라가지 않습니다)</span></label>
+      <label>그림책 <span style="font-weight:600;color:var(--sub)">기본 그림책이 이미 들어 있어요. 다른 책으로 바꾸고 싶을 때만 불러오세요 (불러온 파일은 이 컴퓨터에만 저장됩니다)</span></label>
       <div class="bookfile">
         <input type="file" id="bookFile" accept="application/pdf,image/*" multiple hidden>
-        <button class="mini-btn" id="bookPick">📖 그림책 불러오기 (PDF · 사진)</button>
-        <button class="mini-btn" id="bookClear">지우기</button>
+        <button class="mini-btn" id="bookPick">📖 다른 그림책 불러오기 (PDF · 사진)</button>
+        <button class="mini-btn" id="bookClear">기본 그림책으로</button>
         <span class="bookstat" id="bookStat">아직 없어요</span>
       </div>
       <div class="bookfile" id="bookRangeRow" hidden>
@@ -1113,22 +1113,33 @@
      저작권이 있는 그림책을 공개 주소에 올리지 않기 위해,
      파일은 브라우저의 IndexedDB 에만 넣고 인터넷으로 보내지 않는다.
      쪽은 base64 가 아니라 Blob 으로 담는다(용량이 작고 인코딩이 빠르다). */
+  /* 앱에 들어 있는 기본 그림책 장면 (선생님이 직접 만든 47장).
+     설정에서 다른 책을 불러오면 그걸 대신 쓴다. */
+  var BUILTIN_BOOK = (function(){
+    var a = [];
+    for(var i = 1; i <= 47; i++) a.push("img/book/p" + (i < 10 ? "0" : "") + i + ".jpg");
+    return a;
+  })();
   var BOOK = [], bookIdx = 0, bookUrls = [];
+  function usingBuiltin(){ return BOOK.length === 0; }
   var PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
   var PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
   /* 설정에서 고른 쪽 범위만 수업에 쓴다 (0 이면 전체) */
+  function bookTotal(){ return usingBuiltin() ? BUILTIN_BOOK.length : BOOK.length; }
   function bookRange(){
-    if(!BOOK.length) return [0, 0];
-    var a = Number(cfg.s1.bookFrom) || 1, b = Number(cfg.s1.bookTo) || BOOK.length;
-    a = Math.max(1, Math.min(BOOK.length, a));
-    b = Math.max(a, Math.min(BOOK.length, b));
+    var t = bookTotal();
+    if(!t) return [0, 0];
+    var a = Number(cfg.s1.bookFrom) || 1, b = Number(cfg.s1.bookTo) || t;
+    a = Math.max(1, Math.min(t, a));
+    b = Math.max(a, Math.min(t, b));
     return [a - 1, b];
   }
   function bookCount(){ var r = bookRange(); return r[1] - r[0]; }
   function bookUrl(i){                       // i = 범위 안 순번
     var r = bookRange(), k = r[0] + i;
-    if(k < 0 || k >= BOOK.length) return "";
+    if(k < 0 || k >= bookTotal()) return "";
+    if(usingBuiltin()) return BUILTIN_BOOK[k];
     if(!bookUrls[k]) bookUrls[k] = URL.createObjectURL(BOOK[k]);
     return bookUrls[k];
   }
@@ -1249,14 +1260,16 @@
   function bookStat(msg){
     var el = $("bookStat");
     if(el) el.textContent = msg !== undefined ? msg
-      : (BOOK.length ? BOOK.length + "쪽 들어 있어요 ✅" : "아직 없어요");
+      : (BOOK.length ? "불러온 책 " + BOOK.length + "쪽 ✅"
+                     : "기본 그림책 " + BUILTIN_BOOK.length + "쪽이 들어 있어요 ✅");
     var row = $("bookRangeRow");
     if(row && msg === undefined){
-      row.hidden = !BOOK.length;
-      if(BOOK.length){
-        $("c1BookFrom").max = $("c1BookTo").max = BOOK.length;
+      var t = bookTotal();
+      row.hidden = !t;
+      if(t){
+        $("c1BookFrom").max = $("c1BookTo").max = t;
         if(!$("c1BookFrom").value) $("c1BookFrom").value = Number(cfg.s1.bookFrom) || 1;
-        if(!$("c1BookTo").value)   $("c1BookTo").value   = Number(cfg.s1.bookTo) || BOOK.length;
+        if(!$("c1BookTo").value)   $("c1BookTo").value   = Number(cfg.s1.bookTo) || t;
       }
     }
   }
@@ -1488,8 +1501,10 @@
   $("bookFile").addEventListener("change", function(e){ pickBook(e.target.files); e.target.value=""; });
   $("bookClear").addEventListener("click", function(){
     if(!BOOK.length){ bookStat(); return; }
-    if(!confirm("넣어둔 그림책을 지울까요?")) return;
+    if(!confirm("불러온 그림책을 지우고 기본 그림책으로 돌아갈까요?")) return;
     dropUrls(); BOOK = []; bookIdx = 0;
+    cfg.s1.bookFrom = 0; cfg.s1.bookTo = 0; saveCfg();
+    $("c1BookFrom").value = ""; $("c1BookTo").value = "";
     bookSave([]).then(function(){ bookStat(); render(); });
   });
   $("bkPrev").addEventListener("click", function(){ bookGo(bookIdx - 1); });
