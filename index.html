@@ -127,16 +127,16 @@
   .songwrap iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
   .bookfile{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .bookstat{font-size:14px;color:var(--sub)}
-  .booknav{display:flex;align-items:center;gap:8px;margin:6px 0 10px;flex-wrap:wrap}
+  .booknav{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0 10px;flex-wrap:wrap}
   .booknav button{
-    font-family:inherit;font-size:clamp(17px,2.4vh,24px);line-height:1;cursor:pointer;
-    border:2px solid var(--line,#e3ddf3);background:#fff;border-radius:14px;padding:.35em .7em;
+    font-family:inherit;font-size:clamp(18px,2.8vh,28px);line-height:1;cursor:pointer;
+    border:2px solid var(--line,#e3ddf3);background:#fff;border-radius:14px;padding:.4em .85em;
     box-shadow:0 3px 0 rgba(0,0,0,.08);
   }
   .booknav button:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.08)}
   .booknav button[disabled]{opacity:.35;pointer-events:none}
-  .booknav #bkNo{font-size:clamp(16px,2.2vh,22px);color:var(--sub);min-width:4.5em;text-align:center}
-  .booknav .wide{margin-left:auto}
+  .booknav #bkNo{font-size:clamp(17px,2.5vh,26px);color:var(--sub);min-width:4.2em;text-align:center}
+  .booknav .wide{margin-left:0;flex:0 0 auto}
   .bookview{position:fixed;inset:0;z-index:120;background:#1d1a26;display:flex;align-items:center;justify-content:center}
   .bookview[hidden]{display:none}
   .bookview img{max-width:100%;max-height:100%;object-fit:contain}
@@ -389,16 +389,16 @@
   .songwrap iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
   .bookfile{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .bookstat{font-size:14px;color:var(--sub)}
-  .booknav{display:flex;align-items:center;gap:8px;margin:6px 0 10px;flex-wrap:wrap}
+  .booknav{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0 10px;flex-wrap:wrap}
   .booknav button{
-    font-family:inherit;font-size:clamp(17px,2.4vh,24px);line-height:1;cursor:pointer;
-    border:2px solid var(--line,#e3ddf3);background:#fff;border-radius:14px;padding:.35em .7em;
+    font-family:inherit;font-size:clamp(18px,2.8vh,28px);line-height:1;cursor:pointer;
+    border:2px solid var(--line,#e3ddf3);background:#fff;border-radius:14px;padding:.4em .85em;
     box-shadow:0 3px 0 rgba(0,0,0,.08);
   }
   .booknav button:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.08)}
   .booknav button[disabled]{opacity:.35;pointer-events:none}
-  .booknav #bkNo{font-size:clamp(16px,2.2vh,22px);color:var(--sub);min-width:4.5em;text-align:center}
-  .booknav .wide{margin-left:auto}
+  .booknav #bkNo{font-size:clamp(17px,2.5vh,26px);color:var(--sub);min-width:4.2em;text-align:center}
+  .booknav .wide{margin-left:0;flex:0 0 auto}
   .bookview{position:fixed;inset:0;z-index:120;background:#1d1a26;display:flex;align-items:center;justify-content:center}
   .bookview[hidden]{display:none}
   .bookview img{max-width:100%;max-height:100%;object-fit:contain}
@@ -475,9 +475,6 @@
           <button id="bkNext" title="다음장">▶</button>
           <button id="bkFull" class="wide">🔍 크게 보기</button>
         </div>
-        <div class="lead" id="s1lead">그림책을 함께 읽어 봅시다</div>
-        <div class="qlist" id="s1qs"></div>
-        <div class="goal" id="s1goal"></div>
       </div>
 
       <!-- 활동1 : 장점 쓰기 -->
@@ -616,9 +613,6 @@
       <div><label for="c1Sec">읽기 시간(분)</label><input type="number" id="c1Sec" min="1" max="60" value="10"></div>
       <div><label for="c1Book">그림책 제목</label><input type="text" id="c1Book"></div>
     </div>
-    <div class="row"><label for="c1Lead">안내 문구</label><input type="text" id="c1Lead"></div>
-    <div class="row"><label for="c1Qs">발문 <span style="font-weight:600;color:var(--sub)">(한 줄에 하나씩)</span></label><textarea id="c1Qs"></textarea></div>
-    <div class="row"><label for="c1Goal">학습 목표</label><input type="text" id="c1Goal"></div>
     <div class="row">
       <label>그림책 <span style="font-weight:600;color:var(--sub)">기본 그림책이 이미 들어 있어요. 다른 책으로 바꾸고 싶을 때만 불러오세요 (불러온 파일은 이 컴퓨터에만 저장됩니다)</span></label>
       <div class="bookfile">
@@ -778,7 +772,7 @@
     sound:true, signal:"youtube", signalText:"당근왔숑!", customSound:"",
     yt:{ id:"FtGC_nRpbTk", start:0, dur:4, show:false },
     hints:JSON.parse(JSON.stringify(HINT_DEFAULT)),
-    split:{ book:50, write:50, market:50, letter:50 },   // 활동별 그림 폭(%)
+    split:{ book:74, write:50, market:50, letter:50 },   // 활동별 그림 폭(%)
     s1:{ sec:600, book:"내가 너라서 좋아", lead:"그림책을 함께 읽어 봅시다", bookFrom:0, bookTo:0,
          qs:["거울 속의 내가 주인공에게 해준 말 중 가장 기억에 남는 말은 무엇인가요?",
              "거울이 여러분에게 말을 해준다면, 여러분은 어떤 말을 듣고 싶나요?"],
@@ -790,6 +784,8 @@
 
   var KEY_CFG = "praise_cfg_v4";
   var cfg = loadCfg();
+  /* 그림책 패널에서 발문·목표를 뺐으므로 그림을 넓게 (한 번만) */
+  if(!cfg.bookWide){ cfg.split = cfg.split || {}; cfg.split.book = 74; cfg.bookWide = 1; }
 
   /* ================= 상태 ================= */
   var idx = 0;                                   // 현재 슬라이드
@@ -995,12 +991,7 @@
 
   /* ================= 활동 패널 ================= */
   function renderBook(){
-    $("s1book").textContent = cfg.s1.book;
-    $("s1lead").textContent = cfg.s1.lead;
-    $("s1qs").innerHTML = cfg.s1.qs.map(function(q,i){
-      return '<div class="q"><span class="qno">'+(i+1)+'</span><span class="qtext">'+esc(q)+'</span></div>';
-    }).join("");
-    $("s1goal").innerHTML = '오늘의 학습 목표<br><b>'+esc(cfg.s1.goal)+'</b>';
+    $("s1book").textContent = cfg.s1.book;   /* 발문·학습목표는 따로 슬라이드가 있어서 패널에선 뺐다 */
   }
   function renderWrite(){
     $("s2lead").textContent = cfg.s2.lead;
@@ -1547,8 +1538,7 @@
   function fillSetup(){
     $("cSong").value = cfg.song || "";
     $("c1Sec").value = Math.round(cfg.s1.sec/60);
-    $("c1Book").value = cfg.s1.book; $("c1Lead").value = cfg.s1.lead;
-    $("c1Qs").value = cfg.s1.qs.join("\n"); $("c1Goal").value = cfg.s1.goal;
+    $("c1Book").value = cfg.s1.book;
     $("c1BookFrom").value = Number(cfg.s1.bookFrom) || (BOOK.length ? 1 : "");
     $("c1BookTo").value   = Number(cfg.s1.bookTo)   || (BOOK.length ? BOOK.length : "");
     bookStat();
@@ -1593,9 +1583,6 @@
   $("cfgSave").onclick = function(){
     cfg.song = $("cSong").value.trim();
     cfg.s1.sec = num("c1Sec",1,60,10)*60; cfg.s1.book = $("c1Book").value.trim();
-    cfg.s1.lead = txt("c1Lead", DEFAULTS.s1.lead);
-    cfg.s1.qs = lines("c1Qs", DEFAULTS.s1.qs.slice());
-    cfg.s1.goal = txt("c1Goal", DEFAULTS.s1.goal);
     var bf = Math.max(0, parseInt($("c1BookFrom").value, 10) || 0);
     var bt = Math.max(0, parseInt($("c1BookTo").value, 10) || 0);
     /* 처음~끝 전체면 「범위 없음」으로 둔다. 그래야 나중에 쪽이 늘어도 잘리지 않는다. */
