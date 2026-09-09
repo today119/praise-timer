@@ -813,7 +813,7 @@
   }
   function buildDeck(){
     DECK = BASE_DECK.slice();
-    if(songId()) DECK.splice(1, 0, {img:"img/intro.jpg", stage:1, song:true, name:"노래 부르기"});
+    if(songId()) DECK.unshift({img:"img/intro.jpg", stage:1, song:true, name:"노래 부르기"});
     if(idx >= DECK.length) idx = DECK.length - 1;
   }
   function cur(){ return DECK[idx]; }
@@ -1113,11 +1113,11 @@
      저작권이 있는 그림책을 공개 주소에 올리지 않기 위해,
      파일은 브라우저의 IndexedDB 에만 넣고 인터넷으로 보내지 않는다.
      쪽은 base64 가 아니라 Blob 으로 담는다(용량이 작고 인코딩이 빠르다). */
-  /* 앱에 들어 있는 기본 그림책 장면 (선생님이 직접 만든 47장).
+  /* 앱에 들어 있는 기본 그림책 장면 (선생님이 직접 만든 48장, ①~㉙).
      설정에서 다른 책을 불러오면 그걸 대신 쓴다. */
   var BUILTIN_BOOK = (function(){
     var a = [];
-    for(var i = 1; i <= 47; i++) a.push("img/book/p" + (i < 10 ? "0" : "") + i + ".jpg");
+    for(var i = 1; i <= 48; i++) a.push("img/book/p" + (i < 10 ? "0" : "") + i + ".jpg");
     return a;
   })();
   var BOOK = [], bookIdx = 0, bookUrls = [];
