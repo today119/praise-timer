@@ -122,6 +122,33 @@
   .handle:hover::before, .handle.drag::before{background:var(--theme); height:clamp(70px,26vh,200px)}
   .handle:hover{background:var(--theme-soft)}
   body.resizing{cursor:col-resize; user-select:none}
+  .songwrap{flex:1 1 auto;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;border-radius:16px;overflow:hidden}
+  .songwrap[hidden]{display:none}
+  .songwrap iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
+  .bookfile{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .bookstat{font-size:14px;color:var(--sub)}
+  .booknav{display:flex;align-items:center;gap:8px;margin:6px 0 10px;flex-wrap:wrap}
+  .booknav button{
+    font-family:inherit;font-size:clamp(17px,2.4vh,24px);line-height:1;cursor:pointer;
+    border:2px solid var(--line,#e3ddf3);background:#fff;border-radius:14px;padding:.35em .7em;
+    box-shadow:0 3px 0 rgba(0,0,0,.08);
+  }
+  .booknav button:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.08)}
+  .booknav button[disabled]{opacity:.35;pointer-events:none}
+  .booknav #bkNo{font-size:clamp(16px,2.2vh,22px);color:var(--sub);min-width:4.5em;text-align:center}
+  .booknav .wide{margin-left:auto}
+  .bookview{position:fixed;inset:0;z-index:120;background:#1d1a26;display:flex;align-items:center;justify-content:center}
+  .bookview[hidden]{display:none}
+  .bookview img{max-width:100%;max-height:100%;object-fit:contain}
+  .bv-nav{position:absolute;top:50%;transform:translateY(-50%);font-size:34px;color:#fff;
+    background:rgba(255,255,255,.16);border:none;border-radius:50%;width:74px;height:74px;cursor:pointer}
+  .bv-nav:active{background:rgba(255,255,255,.3)}
+  .bv-nav[disabled]{opacity:.2;pointer-events:none}
+  .bv-prev{left:2vw} .bv-next{right:2vw}
+  .bv-bar{position:absolute;bottom:2vh;left:50%;transform:translateX(-50%);display:flex;gap:12px;
+    align-items:center;color:#fff;font-size:20px;background:rgba(0,0,0,.4);padding:.5em 1em;border-radius:99px}
+  .bv-bar button{font-family:inherit;font-size:18px;color:#fff;background:rgba(255,255,255,.2);
+    border:none;border-radius:99px;padding:.35em 1em;cursor:pointer}
   .slide.split .actpanel{
     flex:1 1 0; min-width:0; height:100%;
     background:var(--card); border-radius:var(--r); box-shadow:var(--shadow);
@@ -357,7 +384,34 @@
     .slide{flex-direction:column; gap:8px}
     .slide.split .shot{width:auto !important; max-width:100% !important; max-height:34vh; flex:0 0 auto}
     .handle{display:none}
-    .slide.split .actpanel{height:auto; flex:1 1 auto; width:100%; padding:11px 13px}
+    .songwrap{flex:1 1 auto;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;border-radius:16px;overflow:hidden}
+  .songwrap[hidden]{display:none}
+  .songwrap iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
+  .bookfile{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .bookstat{font-size:14px;color:var(--sub)}
+  .booknav{display:flex;align-items:center;gap:8px;margin:6px 0 10px;flex-wrap:wrap}
+  .booknav button{
+    font-family:inherit;font-size:clamp(17px,2.4vh,24px);line-height:1;cursor:pointer;
+    border:2px solid var(--line,#e3ddf3);background:#fff;border-radius:14px;padding:.35em .7em;
+    box-shadow:0 3px 0 rgba(0,0,0,.08);
+  }
+  .booknav button:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.08)}
+  .booknav button[disabled]{opacity:.35;pointer-events:none}
+  .booknav #bkNo{font-size:clamp(16px,2.2vh,22px);color:var(--sub);min-width:4.5em;text-align:center}
+  .booknav .wide{margin-left:auto}
+  .bookview{position:fixed;inset:0;z-index:120;background:#1d1a26;display:flex;align-items:center;justify-content:center}
+  .bookview[hidden]{display:none}
+  .bookview img{max-width:100%;max-height:100%;object-fit:contain}
+  .bv-nav{position:absolute;top:50%;transform:translateY(-50%);font-size:34px;color:#fff;
+    background:rgba(255,255,255,.16);border:none;border-radius:50%;width:74px;height:74px;cursor:pointer}
+  .bv-nav:active{background:rgba(255,255,255,.3)}
+  .bv-nav[disabled]{opacity:.2;pointer-events:none}
+  .bv-prev{left:2vw} .bv-next{right:2vw}
+  .bv-bar{position:absolute;bottom:2vh;left:50%;transform:translateX(-50%);display:flex;gap:12px;
+    align-items:center;color:#fff;font-size:20px;background:rgba(0,0,0,.4);padding:.5em 1em;border-radius:99px}
+  .bv-bar button{font-family:inherit;font-size:18px;color:#fff;background:rgba(255,255,255,.2);
+    border:none;border-radius:99px;padding:.35em 1em;cursor:pointer}
+  .slide.split .actpanel{height:auto; flex:1 1 auto; width:100%; padding:11px 13px}
     .lead{font-size:clamp(16px,4.4vw,26px)}
     .q .qtext{font-size:clamp(13px,3.7vw,20px)}
     .fr{font-size:clamp(15px,4.1vw,23px)}
@@ -406,9 +460,21 @@
       <img class="shot" id="shot" src="img/intro.jpg" alt="수업 자료">
       <div class="handle" id="handle" title="끌어서 그림 크기를 조절하세요" hidden></div>
 
+      <!-- 수업 시작 노래 -->
+      <div class="songwrap" id="songWrap" hidden>
+        <iframe id="songFrame" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowfullscreen frameborder="0" title="수업 시작 노래"></iframe>
+      </div>
+
       <!-- 그림책 읽기 -->
       <div class="actpanel" id="actBook" hidden>
         <div class="badge-top">📖 <span id="s1book">내가 너라서 좋아</span></div>
+        <div class="booknav" id="bookNav" hidden>
+          <button id="bkPrev" title="앞장">◀</button>
+          <span id="bkNo">1 / 1</span>
+          <button id="bkNext" title="다음장">▶</button>
+          <button id="bkFull" class="wide">🔍 크게 보기</button>
+        </div>
         <div class="lead" id="s1lead">그림책을 함께 읽어 봅시다</div>
         <div class="qlist" id="s1qs"></div>
         <div class="goal" id="s1goal"></div>
@@ -527,10 +593,23 @@
 <div class="overlay" id="lightbox"><img id="lbImg" src="" alt=""></div>
 
 <!-- 설정 -->
+<div class="bookview" id="bookView" hidden>
+  <img id="bvImg" alt="그림책">
+  <button class="bv-nav bv-prev" id="bvPrev">◀</button>
+  <button class="bv-nav bv-next" id="bvNext">▶</button>
+  <div class="bv-bar"><span id="bvNo">1 / 1</span><button id="bvClose">닫기</button></div>
+</div>
+
 <div class="overlay" id="setup">
   <div class="setup-box">
     <h1>수업 설정</h1>
     <p class="desc">공개수업 전에 한 번만 맞춰 두면 됩니다. 설정은 이 브라우저에 자동 저장돼요.</p>
+
+    <div class="row">
+      <label for="cSong">🎵 수업 시작 노래 (유튜브 주소)
+        <span style="font-weight:600;color:var(--sub)">비워 두면 노래 슬라이드가 안 나와요</span></label>
+      <input type="text" id="cSong" placeholder="https://www.youtube.com/watch?v=...">
+    </div>
 
     <div class="sec-title s1"><span class="no">1</span>그림책 읽기</div>
     <div class="grid">
@@ -540,6 +619,22 @@
     <div class="row"><label for="c1Lead">안내 문구</label><input type="text" id="c1Lead"></div>
     <div class="row"><label for="c1Qs">발문 <span style="font-weight:600;color:var(--sub)">(한 줄에 하나씩)</span></label><textarea id="c1Qs"></textarea></div>
     <div class="row"><label for="c1Goal">학습 목표</label><input type="text" id="c1Goal"></div>
+    <div class="row">
+      <label>그림책 파일 <span style="font-weight:600;color:var(--sub)">(이 컴퓨터에만 저장돼요 · 인터넷에 올라가지 않습니다)</span></label>
+      <div class="bookfile">
+        <input type="file" id="bookFile" accept="application/pdf,image/*" multiple hidden>
+        <button class="mini-btn" id="bookPick">📖 그림책 불러오기 (PDF · 사진)</button>
+        <button class="mini-btn" id="bookClear">지우기</button>
+        <span class="bookstat" id="bookStat">아직 없어요</span>
+      </div>
+      <div class="bookfile" id="bookRangeRow" hidden>
+        <span class="bookstat">읽어줄 쪽만 고르기</span>
+        <input type="number" id="c1BookFrom" min="1" style="width:5.5em">
+        <span class="bookstat">쪽 ~</span>
+        <input type="number" id="c1BookTo" min="1" style="width:5.5em">
+        <span class="bookstat">쪽</span>
+      </div>
+    </div>
 
     <div class="sec-title s2"><span class="no">2</span>활동 1 · 내가 나라서 좋아!</div>
     <div class="grid">
@@ -638,7 +733,7 @@
   "use strict";
 
   /* ================= 수업 슬라이드 덱 ================= */
-  var DECK = [
+  var BASE_DECK = [
     {img:"img/intro.jpg",      stage:1, name:"대문"},
     {img:"img/book.jpg",       stage:1, act:"book",   sec:"s1", name:"그림책 읽기"},
     {img:"img/q1.jpg",         stage:1, name:"발문 1"},
@@ -657,9 +752,11 @@
     {img:"img/market.jpg",     stage:3, act:"market", sec:"s3", name:"당근 장점마켓"},
     {img:"img/wrapup.jpg",     stage:4, name:"정리"},
     {img:"img/wrapup.jpg",     stage:4, act:"letter", sec:"s4", name:"편지 쓰기"},
+    {img:"img/parents.jpg",    stage:4, name:"학부모 메모"},
     {img:"img/mirrors.jpg",    stage:4, name:"세 거울"},
     {img:"img/thanks.jpg",     stage:4, name:"감사합니다"}
   ];
+  var DECK = BASE_DECK.slice();
   var ACT_EMOJI = {book:"📖", write:"🪞", market:"🥕", letter:"💌"};
 
   /* ================= 기본 설정 ================= */
@@ -677,11 +774,12 @@
   ];
 
   var DEFAULTS = {
+    song:"",
     sound:true, signal:"youtube", signalText:"당근왔숑!", customSound:"",
     yt:{ id:"FtGC_nRpbTk", start:0, dur:4, show:false },
     hints:JSON.parse(JSON.stringify(HINT_DEFAULT)),
     split:{ book:50, write:50, market:50, letter:50 },   // 활동별 그림 폭(%)
-    s1:{ sec:600, book:"내가 너라서 좋아", lead:"그림책을 함께 읽어 봅시다",
+    s1:{ sec:600, book:"내가 너라서 좋아", lead:"그림책을 함께 읽어 봅시다", bookFrom:0, bookTo:0,
          qs:["거울 속의 내가 주인공에게 해준 말 중 가장 기억에 남는 말은 무엇인가요?",
              "거울이 여러분에게 말을 해준다면, 여러분은 어떤 말을 듣고 싶나요?"],
          goal:"나의 반짝이는 장점을 발견하고, 친구들과 나누어 봅시다!" },
@@ -705,6 +803,19 @@
   var RING_C = 2 * Math.PI * 112;
   $("ringFg").style.strokeDasharray = RING_C;
 
+  /* 유튜브 주소에서 영상 번호만 뽑는다 */
+  function songId(){
+    var u = String(cfg.song || "").trim();
+    if(!u) return "";
+    var m = u.match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{6,})/);
+    if(m) return m[1];
+    return /^[A-Za-z0-9_-]{6,}$/.test(u) ? u : "";
+  }
+  function buildDeck(){
+    DECK = BASE_DECK.slice();
+    if(songId()) DECK.splice(1, 0, {img:"img/intro.jpg", stage:1, song:true, name:"노래 부르기"});
+    if(idx >= DECK.length) idx = DECK.length - 1;
+  }
   function cur(){ return DECK[idx]; }
   function actSec(a){ return a ? cfg[cur().sec].sec : 0; }
 
@@ -997,6 +1108,216 @@
     doneOverlay.classList.add("show");
   }
 
+
+  /* ================= 그림책 파일 (이 컴퓨터에만 저장) =================
+     저작권이 있는 그림책을 공개 주소에 올리지 않기 위해,
+     파일은 브라우저의 IndexedDB 에만 넣고 인터넷으로 보내지 않는다.
+     쪽은 base64 가 아니라 Blob 으로 담는다(용량이 작고 인코딩이 빠르다). */
+  var BOOK = [], bookIdx = 0, bookUrls = [];
+  var PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+  var PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+  /* 설정에서 고른 쪽 범위만 수업에 쓴다 (0 이면 전체) */
+  function bookRange(){
+    if(!BOOK.length) return [0, 0];
+    var a = Number(cfg.s1.bookFrom) || 1, b = Number(cfg.s1.bookTo) || BOOK.length;
+    a = Math.max(1, Math.min(BOOK.length, a));
+    b = Math.max(a, Math.min(BOOK.length, b));
+    return [a - 1, b];
+  }
+  function bookCount(){ var r = bookRange(); return r[1] - r[0]; }
+  function bookUrl(i){                       // i = 범위 안 순번
+    var r = bookRange(), k = r[0] + i;
+    if(k < 0 || k >= BOOK.length) return "";
+    if(!bookUrls[k]) bookUrls[k] = URL.createObjectURL(BOOK[k]);
+    return bookUrls[k];
+  }
+  function dropUrls(){
+    bookUrls.forEach(function(u){ if(u) URL.revokeObjectURL(u); });
+    bookUrls = [];
+  }
+
+  function bookDB(){
+    return new Promise(function(res, rej){
+      var r = indexedDB.open("praise_book", 1);
+      r.onupgradeneeded = function(){ r.result.createObjectStore("kv"); };
+      r.onsuccess = function(){ res(r.result); };
+      r.onerror = function(){ rej(r.error); };
+    });
+  }
+  function bookLoad(){
+    return bookDB().then(function(db){
+      return new Promise(function(res){
+        var g = db.transaction("kv").objectStore("kv").get("pages");
+        g.onsuccess = function(){ res(g.result || []); };
+        g.onerror = function(){ res([]); };
+      });
+    }).catch(function(){ return []; });
+  }
+  function bookSave(pages){
+    return bookDB().then(function(db){
+      return new Promise(function(res, rej){
+        var t = db.transaction("kv", "readwrite");
+        t.objectStore("kv").put(pages, "pages");
+        t.oncomplete = function(){ res(); };
+        t.onerror = function(){ rej(t.error); };
+      });
+    });
+  }
+
+  function loadScript(src){
+    return new Promise(function(res, rej){
+      var el = document.createElement("script");
+      el.src = src; el.onload = res; el.onerror = function(){ rej(new Error("load")); };
+      document.head.appendChild(el);
+    });
+  }
+  /* ⚠️ 워커는 다른 주소(CDN)에서 바로 못 만든다 → 내려받아 blob 으로 바꿔야
+     진짜 백그라운드 스레드로 돌아간다. 안 그러면 화면이 멈춘 것처럼 느려진다. */
+  var workerReady = null;
+  function ensureWorker(){
+    if(workerReady) return workerReady;
+    workerReady = fetch(PDFJS_WORKER).then(function(r){ return r.text(); }).then(function(code){
+      var url = URL.createObjectURL(new Blob([code], {type: "text/javascript"}));
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = url;
+    }).catch(function(){
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;   // 최후 수단
+    });
+    return workerReady;
+  }
+
+  function canvasToBlob(cv){
+    var max = 1400, w = cv.width, h = cv.height;
+    if(Math.max(w, h) > max){
+      var r = max / Math.max(w, h);
+      var c2 = document.createElement("canvas");
+      c2.width = Math.round(w * r); c2.height = Math.round(h * r);
+      c2.getContext("2d").drawImage(cv, 0, 0, c2.width, c2.height);
+      cv = c2;
+    }
+    return new Promise(function(res){ cv.toBlob(res, "image/jpeg", 0.8); });
+  }
+  function imageToBlob(file){
+    return new Promise(function(res){
+      var img = new Image();
+      img.onload = function(){
+        var cv = document.createElement("canvas");
+        cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+        cv.getContext("2d").drawImage(img, 0, 0);
+        canvasToBlob(cv).then(res);
+        URL.revokeObjectURL(img.src);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  }
+  function pdfToBlobs(file, onStep){
+    return loadScript(PDFJS_URL)
+      .then(ensureWorker)
+      .then(function(){ return file.arrayBuffer(); })
+      .then(function(buf){
+        return window.pdfjsLib.getDocument({
+          data: buf,
+          cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/", cMapPacked: true,
+          standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/"
+        }).promise;
+      })
+      .then(function(doc){
+        var out = [], i = 1;
+        function step(){
+          if(i > doc.numPages) return out;
+          return doc.getPage(i).then(function(page){
+            var base = page.getViewport({scale: 1});
+            var vp = page.getViewport({scale: Math.min(2.2, 1400 / base.width)});
+            var cv = document.createElement("canvas");
+            cv.width = vp.width; cv.height = vp.height;
+            /* ⚠️ intent:"print" 필수 — 기본값(display)은 requestAnimationFrame 으로 그리는데
+               탭이 뒤에 있으면 rAF 가 안 돌아 변환이 영원히 멈춘다. */
+            return page.render({canvasContext: cv.getContext("2d"), viewport: vp, intent: "print"}).promise
+              .then(function(){ return canvasToBlob(cv); })
+              .then(function(blob){
+                out.push(blob);
+                if(onStep) onStep(i, doc.numPages);
+                i++;
+                return new Promise(function(r){ setTimeout(r, 0); }).then(step);  // 화면이 숨 쉬게
+              });
+          });
+        }
+        return step();
+      });
+  }
+
+  function bookStat(msg){
+    var el = $("bookStat");
+    if(el) el.textContent = msg !== undefined ? msg
+      : (BOOK.length ? BOOK.length + "쪽 들어 있어요 ✅" : "아직 없어요");
+    var row = $("bookRangeRow");
+    if(row && msg === undefined){
+      row.hidden = !BOOK.length;
+      if(BOOK.length){
+        $("c1BookFrom").max = $("c1BookTo").max = BOOK.length;
+        if(!$("c1BookFrom").value) $("c1BookFrom").value = Number(cfg.s1.bookFrom) || 1;
+        if(!$("c1BookTo").value)   $("c1BookTo").value   = Number(cfg.s1.bookTo) || BOOK.length;
+      }
+    }
+  }
+
+  function pickBook(files){
+    if(!files || !files.length) return;
+    var list = Array.prototype.slice.call(files);
+    var pdf = list.filter(function(f){ return /pdf$/i.test(f.type) || /\.pdf$/i.test(f.name); });
+    var imgs = list.filter(function(f){ return /^image\//.test(f.type); })
+                   .sort(function(a,b){ return a.name.localeCompare(b.name, "ko", {numeric:true}); });
+    bookStat("불러오는 중… 잠시만요");
+
+    var job = pdf.length
+      ? pdfToBlobs(pdf[0], function(i, n){ bookStat("그림책 만드는 중… " + i + " / " + n + "쪽"); })
+      : Promise.all(imgs.map(imageToBlob));
+
+    job.then(function(pages){
+      if(!pages.length){ bookStat("파일을 못 읽었어요 😢"); return; }
+      dropUrls();
+      BOOK = pages; bookIdx = 0;
+      cfg.s1.bookFrom = 0; cfg.s1.bookTo = 0; saveCfg();
+      $("c1BookFrom").value = 1; $("c1BookTo").value = pages.length;
+      return bookSave(BOOK).then(function(){
+        bookStat();
+        render();
+      });
+    }).catch(function(){
+      bookStat("불러오지 못했어요 😢 (인터넷 연결을 확인해 주세요)");
+    });
+  }
+
+  function renderBookNav(){
+    var n = bookCount();
+    $("bookNav").hidden = !n;
+    if(!n) return;
+    if(bookIdx >= n) bookIdx = n - 1;
+    $("bkNo").textContent = (bookIdx + 1) + " / " + n;
+    $("bkPrev").disabled = (bookIdx === 0);
+    $("bkNext").disabled = (bookIdx === n - 1);
+  }
+  function bookGo(k){
+    var n = bookCount();
+    if(!n) return;
+    bookIdx = Math.max(0, Math.min(n - 1, k));
+    if(cur().act === "book") shot.setAttribute("src", bookUrl(bookIdx));
+    renderBookNav();
+    if(!$("bookView").hidden){ $("bvImg").src = bookUrl(bookIdx); renderBV(); }
+  }
+  function renderBV(){
+    var n = bookCount();
+    $("bvNo").textContent = (bookIdx + 1) + " / " + n;
+    $("bvPrev").disabled = (bookIdx === 0);
+    $("bvNext").disabled = (bookIdx === n - 1);
+  }
+  function openBookView(){
+    if(!bookCount()) return;
+    $("bvImg").src = bookUrl(bookIdx);
+    $("bookView").hidden = false;
+    renderBV();
+  }
+
   /* ================= 슬라이드 이동 ================= */
   var PANELS = {book:"actBook", write:"actWrite", market:"actMarket", letter:"actLetter"};
   function render(){
@@ -1009,15 +1330,24 @@
       btns[i].className = "step" + (n===s.stage ? " on" : (n<s.stage ? " past" : ""));
     }
 
-    if(shot.getAttribute("src") !== s.img) shot.setAttribute("src", s.img);
+    var n = (s.act === "book") ? bookCount() : 0;
+    var src = n ? bookUrl(Math.min(bookIdx, n - 1)) : s.img;
+    if(shot.getAttribute("src") !== src) shot.setAttribute("src", src);
     shot.setAttribute("alt", s.name);
+
+    /* 노래 슬라이드 : 유튜브만 크게, 벗어나면 재생을 멈춘다 */
+    var songOn = !!s.song && !!songId();
+    $("songWrap").hidden = !songOn;
+    shot.style.display = songOn ? "none" : "";
+    var want = songOn ? "https://www.youtube.com/embed/" + songId() + "?rel=0&modestbranding=1" : "";
+    if($("songFrame").getAttribute("src") !== want) $("songFrame").setAttribute("src", want);
 
     for(var k in PANELS) $(PANELS[k]).hidden = (s.act !== k);
     slideEl.className = "slide" + (s.act ? " split" : "");
     $("handle").hidden = !s.act;
     applySplit();
 
-    if(s.act === "book") renderBook();
+    if(s.act === "book"){ renderBook(); renderBookNav(); }
     else if(s.act === "write") renderWrite();
     else if(s.act === "market") renderMarket();
     else if(s.act === "letter") renderLetter();
@@ -1153,11 +1483,40 @@
     (function(el){ el.onclick = function(){ gotoStage(parseInt(el.getAttribute("data-go"),10)); }; })(stepEls[si]);
   }
 
+  /* 그림책 버튼 연결 */
+  $("bookPick").addEventListener("click", function(){ $("bookFile").click(); });
+  $("bookFile").addEventListener("change", function(e){ pickBook(e.target.files); e.target.value=""; });
+  $("bookClear").addEventListener("click", function(){
+    if(!BOOK.length){ bookStat(); return; }
+    if(!confirm("넣어둔 그림책을 지울까요?")) return;
+    dropUrls(); BOOK = []; bookIdx = 0;
+    bookSave([]).then(function(){ bookStat(); render(); });
+  });
+  $("bkPrev").addEventListener("click", function(){ bookGo(bookIdx - 1); });
+  $("bkNext").addEventListener("click", function(){ bookGo(bookIdx + 1); });
+  $("bkFull").addEventListener("click", openBookView);
+  shot.addEventListener("click", function(){ if(cur().act === "book" && bookCount()) openBookView(); });
+  $("bvPrev").addEventListener("click", function(){ bookGo(bookIdx - 1); });
+  $("bvNext").addEventListener("click", function(){ bookGo(bookIdx + 1); });
+  $("bvClose").addEventListener("click", function(){ $("bookView").hidden = true; });
+
   document.addEventListener("keydown", function(e){
     if(setup.classList.contains("show")) return;
     if(lightbox.classList.contains("show") || hintOverlay.classList.contains("show")){
       if(e.key === "Escape"){ lightbox.classList.remove("show"); hintOverlay.classList.remove("show"); }
       return;
+    }
+    if(!$("bookView").hidden){                       // 그림책 크게 보기 중
+      if(e.code === "ArrowRight"){ e.preventDefault(); bookGo(bookIdx + 1); return; }
+      if(e.code === "ArrowLeft"){ e.preventDefault(); bookGo(bookIdx - 1); return; }
+      if(e.code === "Escape"){ e.preventDefault(); $("bookView").hidden = true; return; }
+      return;
+    }
+    if(cur().act === "book" && bookCount() && (e.code === "ArrowRight" || e.code === "ArrowLeft")){
+      var np = bookCount();
+      e.preventDefault();                             // 그림책 슬라이드에선 책장을 넘긴다
+      var at = (e.code === "ArrowRight") ? bookIdx + 1 : bookIdx - 1;
+      if(at >= 0 && at < np){ bookGo(at); return; }
     }
     if(e.code === "ArrowRight" || e.code === "Enter"){ e.preventDefault(); next(); }
     else if(e.code === "ArrowLeft"){ e.preventDefault(); prev(); }
@@ -1171,9 +1530,13 @@
 
   /* ================= 설정 ================= */
   function fillSetup(){
+    $("cSong").value = cfg.song || "";
     $("c1Sec").value = Math.round(cfg.s1.sec/60);
     $("c1Book").value = cfg.s1.book; $("c1Lead").value = cfg.s1.lead;
     $("c1Qs").value = cfg.s1.qs.join("\n"); $("c1Goal").value = cfg.s1.goal;
+    $("c1BookFrom").value = Number(cfg.s1.bookFrom) || (BOOK.length ? 1 : "");
+    $("c1BookTo").value   = Number(cfg.s1.bookTo)   || (BOOK.length ? BOOK.length : "");
+    bookStat();
     $("c2Sec").value = Math.round(cfg.s2.sec/60);
     $("c2Warn").value = cfg.s2.warn; $("c2Total").value = cfg.s2.total;
     $("c2Cards").value = cfg.s2.cards; $("c2Lead").value = cfg.s2.lead;
@@ -1213,10 +1576,14 @@
   $("setupBtn").onclick = function(){ if(T.run) pause(); fillSetup(); setup.classList.add("show"); setup.scrollTop = 0; };
   $("cfgDefault").onclick = function(){ cfg = JSON.parse(JSON.stringify(DEFAULTS)); fillSetup(); };
   $("cfgSave").onclick = function(){
+    cfg.song = $("cSong").value.trim();
     cfg.s1.sec = num("c1Sec",1,60,10)*60; cfg.s1.book = $("c1Book").value.trim();
     cfg.s1.lead = txt("c1Lead", DEFAULTS.s1.lead);
     cfg.s1.qs = lines("c1Qs", DEFAULTS.s1.qs.slice());
     cfg.s1.goal = txt("c1Goal", DEFAULTS.s1.goal);
+    cfg.s1.bookFrom = Math.max(0, parseInt($("c1BookFrom").value, 10) || 0);
+    cfg.s1.bookTo   = Math.max(0, parseInt($("c1BookTo").value, 10) || 0);
+    bookIdx = 0;
     cfg.s2.sec = num("c2Sec",1,60,8)*60; cfg.s2.warn = num("c2Warn",0,120,30);
     cfg.s2.total = num("c2Total",1,60,24); cfg.s2.cards = num("c2Cards",1,10,4);
     cfg.s2.lead = txt("c2Lead", DEFAULTS.s2.lead);
@@ -1237,6 +1604,7 @@
       try{ ytPlayer.cueVideoById(newId); ytBroken = false; }catch(e){}
     }
     saveCfg();
+    buildDeck();
     setup.classList.remove("show");
     if(doneCount > cfg.s2.total) doneCount = cfg.s2.total;
     if(round > cfg.s3.rounds + 1) round = 1;
@@ -1284,7 +1652,13 @@
   go(0);
   loadYTApi();
   // 다음 슬라이드 미리 받아두기
-  DECK.forEach(function(s){ var im = new Image(); im.src = s.img; });
+  buildDeck();
+  BASE_DECK.forEach(function(s){ var im = new Image(); im.src = s.img; });
+
+  bookLoad().then(function(pages){
+    BOOK = pages || []; bookStat();
+    if(BOOK.length) render();
+  });
 })();
 </script>
 </body>
