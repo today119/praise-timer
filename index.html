@@ -1113,11 +1113,11 @@
      저작권이 있는 그림책을 공개 주소에 올리지 않기 위해,
      파일은 브라우저의 IndexedDB 에만 넣고 인터넷으로 보내지 않는다.
      쪽은 base64 가 아니라 Blob 으로 담는다(용량이 작고 인코딩이 빠르다). */
-  /* 앱에 들어 있는 기본 그림책 장면 (선생님이 직접 만든 48장, ①~㉙).
+  /* 앱에 들어 있는 기본 그림책 장면 (표지 + ①~㉙, 모두 49장).
      설정에서 다른 책을 불러오면 그걸 대신 쓴다. */
   var BUILTIN_BOOK = (function(){
     var a = [];
-    for(var i = 1; i <= 48; i++) a.push("img/book/p" + (i < 10 ? "0" : "") + i + ".jpg");
+    for(var i = 1; i <= 49; i++) a.push("img/book/p" + (i < 10 ? "0" : "") + i + ".jpg");
     return a;
   })();
   var BOOK = [], bookIdx = 0, bookUrls = [];
@@ -1596,8 +1596,11 @@
     cfg.s1.lead = txt("c1Lead", DEFAULTS.s1.lead);
     cfg.s1.qs = lines("c1Qs", DEFAULTS.s1.qs.slice());
     cfg.s1.goal = txt("c1Goal", DEFAULTS.s1.goal);
-    cfg.s1.bookFrom = Math.max(0, parseInt($("c1BookFrom").value, 10) || 0);
-    cfg.s1.bookTo   = Math.max(0, parseInt($("c1BookTo").value, 10) || 0);
+    var bf = Math.max(0, parseInt($("c1BookFrom").value, 10) || 0);
+    var bt = Math.max(0, parseInt($("c1BookTo").value, 10) || 0);
+    /* 처음~끝 전체면 「범위 없음」으로 둔다. 그래야 나중에 쪽이 늘어도 잘리지 않는다. */
+    if(bf <= 1 && (bt === 0 || bt >= bookTotal())){ bf = 0; bt = 0; }
+    cfg.s1.bookFrom = bf; cfg.s1.bookTo = bt;
     bookIdx = 0;
     cfg.s2.sec = num("c2Sec",1,60,8)*60; cfg.s2.warn = num("c2Warn",0,120,30);
     cfg.s2.total = num("c2Total",1,60,24); cfg.s2.cards = num("c2Cards",1,10,4);
