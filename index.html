@@ -1724,5 +1724,24 @@
   });
 })();
 </script>
+<script>
+/* 새 버전이 올라오면 브라우저가 옛 화면을 붙들고 있지 않도록 스스로 다시 받아온다 */
+(function(){
+  var APP_VER = "20260910-0936";
+  try{
+    fetch("version.txt?t=" + Date.now(), {cache:"no-store"})
+      .then(function(r){ return r.ok ? r.text() : ""; })
+      .then(function(t){
+        t = (t || "").trim();
+        if(!t || t === APP_VER) return;
+        var u = new URL(location.href);
+        if(u.searchParams.get("v") === t) return;   /* 이미 한 번 시도했으면 그만 */
+        u.searchParams.set("v", t);
+        location.replace(u.toString());
+      })
+      .catch(function(){});
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
