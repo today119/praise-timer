@@ -114,6 +114,25 @@
   .fx .cover.gone{opacity:0; transform:scale(1.12) rotate(-2deg); pointer-events:none}
   .fx .cover.goal{background:#F7E3E0; border:6px dashed #E3A49C; color:#D0736A}
   .fx .cover.card{background:#F4F8FF; border:6px solid #CBDCF6; color:#7C9FD8; box-shadow:0 10px 26px rgba(90,120,180,.16)}
+  /* 없다가 톡 나타나는 그림 (파워포인트 「나타내기」 느낌) */
+  .fx .pop{
+    position:absolute; pointer-events:none; opacity:0;
+    transform:translateY(30px) scale(.94);
+    transition:opacity .5s ease, transform .6s cubic-bezier(.2,1.5,.35,1);
+  }
+  .fx .pop.in{opacity:1; transform:none}
+  .fx .pop img{width:100%; height:100%; object-fit:contain; display:block}
+  .fx .tap{
+    position:absolute; pointer-events:auto; cursor:pointer; background:transparent; border:none;
+    display:flex; align-items:center; justify-content:center; font-family:inherit;
+  }
+  .fx .tap.gone{opacity:0; pointer-events:none}
+  .fx .tap .chip{
+    background:rgba(255,255,255,.92); border:2px dashed #c9d6ef; color:#7C9FD8; font-weight:900;
+    border-radius:999px; padding:.5em 1.1em; font-size:clamp(14px,2vh,22px); box-shadow:0 3px 0 rgba(0,0,0,.06);
+    animation:tapPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes tapPulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
   .fx .again{
     position:absolute; right:10px; bottom:10px; pointer-events:auto; cursor:pointer;
     font-family:inherit; font-size:clamp(13px,1.7vh,17px); border:2px solid #e3ddf3;
@@ -761,7 +780,7 @@
     {img:"img/q1.jpg",         stage:1, name:"발문 1"},
     {img:"img/q2.jpg",         stage:1, name:"발문 2"},
     {img:"img/goal.jpg",       stage:1, name:"학습 목표"},
-    {img:"img/activities.jpg", stage:2, name:"오늘의 활동"},
+    {img:"img/act_bg.jpg",     stage:2, name:"오늘의 활동"},
     {img:"img/act1.jpg",       stage:2, name:"활동 1"},
     {img:"img/sheet.jpg",      stage:2, name:"활동지"},
     {img:"img/ex1.jpg",        stage:2, name:"예시 1"},
@@ -1446,11 +1465,11 @@
      그림은 그대로 두고 그 위에 덮개를 얹는다. 좌표는 그림 크기의 % 로 잡는다. */
   var FX_SPOTS = {
     "학습 목표": [
-      {x:48.7, y:43.8, w:13.9, h:16.4, cls:"goal", txt:"?", hint:"눌러 보세요"}
+      {x:47.8, y:44.8, w:13.5, h:15.0, cls:"goal", txt:"?", hint:"눌러 보세요"}
     ],
     "오늘의 활동": [
-      {x:5.0,  y:14.0, w:32, h:76, cls:"card", txt:"활동 1", hint:"눌러 보세요"},
-      {x:62.5, y:14.0, w:34, h:76, cls:"card", txt:"활동 2", hint:"눌러 보세요"}
+      {x:6.00,  y:16.44, w:30.50, h:73.11, pop:"img/act_c1.jpg", label:"활동 1"},
+      {x:62.88, y:16.44, w:33.88, h:73.11, pop:"img/act_c2.jpg", label:"활동 2"}
     ]
   };
   var fxOpen = {};                      /* 이미 열어 둔 덮개 기억 */
@@ -1477,12 +1496,35 @@
     if(!spots || cur().act){ box.hidden = true; box.innerHTML = ""; return; }
     box.hidden = false;
     box.innerHTML = "";
-    var anyOpen = false;
     spots.forEach(function(sp, i){
       var key = cur().name + ":" + i;
+
+      if(sp.pop){                                  /* 없다가 나타나는 그림 */
+        var wrap = document.createElement("div");
+        wrap.className = "pop" + (fxOpen[key] ? " in" : "");
+        wrap.style.left = sp.x + "%"; wrap.style.top = sp.y + "%";
+        wrap.style.width = sp.w + "%"; wrap.style.height = sp.h + "%";
+        wrap.innerHTML = '<img src="' + sp.pop + '" alt="' + esc(sp.label || "") + '">';
+        box.appendChild(wrap);
+
+        var tap = document.createElement("button");
+        tap.className = "tap" + (fxOpen[key] ? " gone" : "");
+        tap.style.left = sp.x + "%"; tap.style.top = sp.y + "%";
+        tap.style.width = sp.w + "%"; tap.style.height = sp.h + "%";
+        tap.innerHTML = '<span class="chip">👆 ' + esc(sp.label || "보여주기") + '</span>';
+        tap.onclick = function(e){
+          e.stopPropagation();
+          fxOpen[key] = true;
+          wrap.classList.add("in");
+          tap.classList.add("gone");
+          buildAgain();
+        };
+        box.appendChild(tap);
+        return;
+      }
+
       var b = document.createElement("button");
       b.className = "cover " + sp.cls + (fxOpen[key] ? " gone" : "");
-      if(fxOpen[key]) anyOpen = true;
       b.style.left = sp.x + "%"; b.style.top = sp.y + "%";
       b.style.width = sp.w + "%"; b.style.height = sp.h + "%";
       b.innerHTML = '<span>' + esc(sp.txt) + '</span>' +
@@ -1915,7 +1957,7 @@
 <script>
 /* 새 버전이 올라오면 브라우저가 옛 화면을 붙들고 있지 않도록 스스로 다시 받아온다 */
 (function(){
-  var APP_VER = "20260910-1200";
+  var APP_VER = "20260910-1410";
   try{
     fetch("version.txt?t=" + Date.now(), {cache:"no-store"})
       .then(function(r){ return r.ok ? r.text() : ""; })
