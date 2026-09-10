@@ -444,6 +444,7 @@
 <div class="torn b"></div>
 <div class="yt-box" id="ytWrap"><div id="ytBox"></div></div>
 <div class="yt-box" id="bgmWrap"><div id="bgmBox"></div></div>
+<audio id="bgmAudio" loop preload="auto"></audio>
 
 <div id="app">
   <div class="top">
@@ -479,7 +480,6 @@
           <span id="bkNo">1 / 1</span>
           <button id="bkNext" title="다음장">▶</button>
           <button id="bkFull" class="wide">🔍 크게 보기</button>
-          <button id="bgmBtn" class="wide" hidden>🎹 음악 켜기</button>
         </div>
       </div>
 
@@ -542,6 +542,7 @@
       <button class="tbtn" id="resetBtn">↺</button>
     </div>
 
+    <button class="btn ghost" id="bgmBtn" hidden>🎹 음악 끄기</button>
     <button class="btn primary" id="changeBtn" hidden>🥕 당근왔숑! →</button>
     <button class="btn blue" id="nextBtn">다음 →</button>
     <span class="counterchip" id="slideNo">1 / 20</span>
@@ -622,6 +623,12 @@
         <span class="bookstat">소리 크기</span>
         <input type="range" id="cBgmVol" min="0" max="100" step="5" style="width:9em">
         <span class="bookstat" id="cBgmVolNo">20</span>
+      </div>
+      <div class="bookfile">
+        <input type="file" id="bgmFile" accept="audio/*" hidden>
+        <button class="mini-btn" id="bgmPick">🎵 음악 파일 넣기 (mp3 · 광고 없음)</button>
+        <button class="mini-btn" id="bgmFileClear">파일 지우기</button>
+        <span class="bookstat" id="bgmFileStat">없음 — 유튜브 주소를 씁니다</span>
       </div>
       <div class="bookfile" id="bookRangeRow" hidden>
         <span class="bookstat">읽어줄 쪽만 고르기</span>
@@ -936,21 +943,45 @@
     }catch(e){}
   }
   function bgmPlay(){
+    if(useFile()){
+      var a = $("bgmAudio");
+      if(!bgmFileUrl){ bgmFileUrl = URL.createObjectURL(BGM_FILE); a.src = bgmFileUrl; a.load(); }
+      a.volume = Math.max(0, Math.min(1, (Number(cfg.bgmVol) || 20) / 100));
+      var pr = a.play();
+      if(pr && pr.catch) pr.catch(function(){ armResume(); });  /* 자동재생이 막히면 다음 클릭 때 다시 */
+      return;
+    }
     if(!bgmReady || !bgmPlayer) return;
     try{ bgmPlayer.unMute(); bgmPlayer.setVolume(Number(cfg.bgmVol) || 20); bgmPlayer.playVideo(); }catch(e){}
   }
+  /* 브라우저가 첫 자동재생을 막는 경우가 있어, 다음 클릭 때 한 번 더 시도한다 */
+  var bgmPending = false;
+  function armResume(){
+    if(bgmPending) return;
+    bgmPending = true;
+    var h = function(){
+      document.removeEventListener("pointerdown", h, true);
+      bgmPending = false;
+      if(bgmWant) bgmPlay();
+    };
+    document.addEventListener("pointerdown", h, true);
+  }
   function bgmStop(){
+    try{ $("bgmAudio").pause(); }catch(e){}
     try{ if(bgmPlayer && bgmReady) bgmPlayer.pauseVideo(); }catch(e){}
   }
-  /* 그림책 슬라이드에서만 흐르게 한다 */
+  /* 그림책 읽기 · 편지 쓰기 화면에서만 흐르게 한다 */
+  var BGM_ACTS = {book:1, letter:1};
   function syncBgm(){
-    var want = bgmOn && !!bgmId() && cur().act === "book";
+    var have = useFile() || !!bgmId();
+    var onAct = !!BGM_ACTS[cur().act];
+    var want = bgmOn && have && onAct;
     var btn = $("bgmBtn");
-    btn.hidden = !bgmId();
+    btn.hidden = !(have && onAct);
     btn.textContent = bgmOn ? "🎹 음악 끄기" : "🎹 음악 켜기";
     if(want === bgmWant) return;
     bgmWant = want;
-    if(want){ if(!bgmPlayer){ loadYTApi(); makeBgm(); } bgmPlay(); }
+    if(want){ if(!useFile() && !bgmPlayer){ loadYTApi(); makeBgm(); } bgmPlay(); }
     else bgmStop();
   }
 
@@ -1187,6 +1218,34 @@
       r.onerror = function(){ rej(r.error); };
     });
   }
+  /* 배경음악 파일 (mp3) — 그림책과 같은 IndexedDB 에 넣는다 */
+  var BGM_FILE = null, bgmFileUrl = "";
+  function bgmFileLoad(){
+    return bookDB().then(function(db){
+      return new Promise(function(res){
+        var g = db.transaction("kv").objectStore("kv").get("bgmfile");
+        g.onsuccess = function(){ res(g.result || null); };
+        g.onerror = function(){ res(null); };
+      });
+    }).catch(function(){ return null; });
+  }
+  function bgmFileSave(blob){
+    return bookDB().then(function(db){
+      return new Promise(function(res, rej){
+        var t = db.transaction("kv", "readwrite");
+        t.objectStore("kv").put(blob, "bgmfile");
+        t.oncomplete = function(){ res(); };
+        t.onerror = function(){ rej(t.error); };
+      });
+    });
+  }
+  function bgmFileStat(){
+    var el = $("bgmFileStat");
+    if(el) el.textContent = BGM_FILE ? "음악 파일이 들어 있어요 ✅ (광고 없이 재생)"
+                                     : "없음 — 유튜브 주소를 씁니다";
+  }
+  function useFile(){ return !!BGM_FILE; }
+
   function bookLoad(){
     return bookDB().then(function(db){
       return new Promise(function(res){
@@ -1531,8 +1590,31 @@
 
   /* 그림책 버튼 연결 */
   $("cBgmVol").addEventListener("input", function(){
-    $("cBgmVolNo").textContent = $("cBgmVol").value;
-    try{ if(bgmPlayer && bgmReady) bgmPlayer.setVolume(Number($("cBgmVol").value)); }catch(e){}
+    var v = Number($("cBgmVol").value);
+    $("cBgmVolNo").textContent = v;
+    try{ $("bgmAudio").volume = Math.max(0, Math.min(1, v/100)); }catch(e){}
+    try{ if(bgmPlayer && bgmReady) bgmPlayer.setVolume(v); }catch(e){}
+  });
+  $("bgmPick").addEventListener("click", function(){ $("bgmFile").click(); });
+  $("bgmFile").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if(!f) return;
+    $("bgmFileStat").textContent = "넣는 중…";
+    bgmFileSave(f).then(function(){
+      if(bgmFileUrl){ URL.revokeObjectURL(bgmFileUrl); bgmFileUrl = ""; }
+      BGM_FILE = f; $("bgmAudio").src = "";
+      bgmFileStat(); bgmWant = false; syncBgm();
+    }).catch(function(){ $("bgmFileStat").textContent = "넣지 못했어요 😢"; });
+  });
+  $("bgmFileClear").addEventListener("click", function(){
+    if(!BGM_FILE){ bgmFileStat(); return; }
+    if(!confirm("넣어둔 음악 파일을 지울까요?")) return;
+    bgmFileSave(null).then(function(){
+      if(bgmFileUrl){ URL.revokeObjectURL(bgmFileUrl); bgmFileUrl = ""; }
+      BGM_FILE = null; $("bgmAudio").pause(); $("bgmAudio").src = "";
+      bgmFileStat(); bgmWant = false; syncBgm();
+    });
   });
   $("bookPick").addEventListener("click", function(){ $("bookFile").click(); });
   $("bookFile").addEventListener("change", function(e){ pickBook(e.target.files); e.target.value=""; });
@@ -1592,6 +1674,7 @@
     $("cBgm").value = cfg.bgm || "";
     $("cBgmVol").value = Number(cfg.bgmVol) || 20;
     $("cBgmVolNo").textContent = Number(cfg.bgmVol) || 20;
+    bgmFileStat();
     $("c1BookFrom").value = Number(cfg.s1.bookFrom) || (BOOK.length ? 1 : "");
     $("c1BookTo").value   = Number(cfg.s1.bookTo)   || (BOOK.length ? BOOK.length : "");
     bookStat();
@@ -1721,6 +1804,12 @@
   buildDeck();
   BASE_DECK.forEach(function(s){ var im = new Image(); im.src = s.img; });
 
+  bgmFileLoad().then(function(f){ BGM_FILE = f || null; bgmFileStat(); syncBgm(); });
+  $("bgmAudio").addEventListener("error", function(){
+    var el = $("bgmFileStat");
+    if(el) el.textContent = "이 파일은 재생이 안 돼요 😢 mp3 로 바꿔서 넣어보세요";
+  });
+
   bookLoad().then(function(pages){
     BOOK = pages || []; bookStat();
     if(BOOK.length) render();
@@ -1730,7 +1819,7 @@
 <script>
 /* 새 버전이 올라오면 브라우저가 옛 화면을 붙들고 있지 않도록 스스로 다시 받아온다 */
 (function(){
-  var APP_VER = "20260910-0956";
+  var APP_VER = "20260910-1012";
   try{
     fetch("version.txt?t=" + Date.now(), {cache:"no-store"})
       .then(function(r){ return r.ok ? r.text() : ""; })
