@@ -98,7 +98,27 @@
   .icon-btn:hover{border-color:var(--theme); color:var(--theme)}
 
   /* 슬라이드 무대 */
-  .stagearea{flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center}
+  .stagearea{flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; position:relative}
+  /* 그림 위에 덮개를 씌워, 누르면 스르륵 열리게 한다 */
+  .fx{position:absolute; pointer-events:none; z-index:6}
+  .fx[hidden]{display:none}
+  .fx .cover{
+    position:absolute; pointer-events:auto; cursor:pointer; font-family:inherit; font-weight:900;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.15em;
+    border-radius:22px; line-height:1.1; text-align:center; overflow:hidden; padding:.35em;
+    transition:opacity .5s ease, transform .5s cubic-bezier(.2,1.4,.4,1);
+  }
+  .fx .cover:hover{filter:brightness(1.03)}
+  .fx .cover:active{transform:scale(.97)}
+  .fx .cover .hint{font-size:.34em; font-weight:800; opacity:.75}
+  .fx .cover.gone{opacity:0; transform:scale(1.12) rotate(-2deg); pointer-events:none}
+  .fx .cover.goal{background:#F7E3E0; border:6px dashed #E3A49C; color:#D0736A}
+  .fx .cover.card{background:#F4F8FF; border:6px solid #CBDCF6; color:#7C9FD8; box-shadow:0 10px 26px rgba(90,120,180,.16)}
+  .fx .again{
+    position:absolute; right:10px; bottom:10px; pointer-events:auto; cursor:pointer;
+    font-family:inherit; font-size:clamp(13px,1.7vh,17px); border:2px solid #e3ddf3;
+    background:rgba(255,255,255,.92); border-radius:14px; padding:.4em .8em; box-shadow:0 3px 0 rgba(0,0,0,.08);
+  }
   .slide{
     width:100%; height:100%; display:flex; align-items:center; justify-content:center;
     gap:clamp(12px,1.8vw,30px);
@@ -462,6 +482,7 @@
   </div>
 
   <div class="stagearea">
+    <div class="fx" id="fx" hidden></div>
     <div class="slide" id="slide">
       <img class="shot" id="shot" src="img/intro.jpg" alt="수업 자료">
       <div class="handle" id="handle" title="끌어서 그림 크기를 조절하세요" hidden></div>
@@ -1420,6 +1441,81 @@
     renderBV();
   }
 
+
+  /* ================= 그림 위 덮개 (누르면 나타나기) =================
+     그림은 그대로 두고 그 위에 덮개를 얹는다. 좌표는 그림 크기의 % 로 잡는다. */
+  var FX_SPOTS = {
+    "학습 목표": [
+      {x:48.7, y:43.8, w:13.9, h:16.4, cls:"goal", txt:"?", hint:"눌러 보세요"}
+    ],
+    "오늘의 활동": [
+      {x:5.0,  y:14.0, w:32, h:76, cls:"card", txt:"활동 1", hint:"눌러 보세요"},
+      {x:62.5, y:14.0, w:34, h:76, cls:"card", txt:"활동 2", hint:"눌러 보세요"}
+    ]
+  };
+  var fxOpen = {};                      /* 이미 열어 둔 덮개 기억 */
+
+  function placeFx(){
+    var box = $("fx");
+    if(box.hidden) return;
+    var r = shot.getBoundingClientRect();
+    var p = shot.parentElement.parentElement.getBoundingClientRect();  /* .stagearea */
+    box.style.left = (r.left - p.left) + "px";
+    box.style.top = (r.top - p.top) + "px";
+    box.style.width = r.width + "px";
+    box.style.height = r.height + "px";
+    var cs = box.querySelectorAll(".cover");
+    for(var i=0;i<cs.length;i++){
+      var w = cs[i].offsetWidth, h = cs[i].offsetHeight;
+      cs[i].style.fontSize = Math.min(64, Math.max(16, Math.min(w, h) * 0.40)) + "px";
+    }
+  }
+
+  function buildFx(){
+    var box = $("fx");
+    var spots = FX_SPOTS[cur().name];
+    if(!spots || cur().act){ box.hidden = true; box.innerHTML = ""; return; }
+    box.hidden = false;
+    box.innerHTML = "";
+    var anyOpen = false;
+    spots.forEach(function(sp, i){
+      var key = cur().name + ":" + i;
+      var b = document.createElement("button");
+      b.className = "cover " + sp.cls + (fxOpen[key] ? " gone" : "");
+      if(fxOpen[key]) anyOpen = true;
+      b.style.left = sp.x + "%"; b.style.top = sp.y + "%";
+      b.style.width = sp.w + "%"; b.style.height = sp.h + "%";
+      b.innerHTML = '<span>' + esc(sp.txt) + '</span>' +
+                    (sp.hint ? '<span class="hint">' + esc(sp.hint) + '</span>' : '');
+      b.onclick = function(e){
+        e.stopPropagation();
+        fxOpen[key] = true;
+        b.classList.add("gone");
+        buildAgain();
+      };
+      box.appendChild(b);
+    });
+    buildAgain();
+    placeFx();
+
+    function buildAgain(){
+      var old = box.querySelector(".again");
+      if(old) old.remove();
+      var open = spots.some(function(sp, i){ return fxOpen[cur().name + ":" + i]; });
+      if(!open) return;
+      var a = document.createElement("button");
+      a.className = "again"; a.textContent = "↺ 다시 가리기";
+      a.onclick = function(e){
+        e.stopPropagation();
+        spots.forEach(function(sp, i){ delete fxOpen[cur().name + ":" + i]; });
+        buildFx();
+      };
+      box.appendChild(a);
+    }
+  }
+  window.addEventListener("resize", placeFx);
+  shot.addEventListener("load", placeFx);
+
   /* ================= 슬라이드 이동 ================= */
   /* letter 는 패널 없이 그림만 크게 보여준다(타이머는 그대로) */
   var PANELS = {book:"actBook", write:"actWrite", market:"actMarket"};
@@ -1462,6 +1558,7 @@
 
     renderTimer();
     syncBgm();
+    buildFx();
   }
   /* 그림 / 활동 패널 비율 : 손잡이를 끌어 조절, 활동마다 따로 기억 */
   function splitPct(){
@@ -1818,7 +1915,7 @@
 <script>
 /* 새 버전이 올라오면 브라우저가 옛 화면을 붙들고 있지 않도록 스스로 다시 받아온다 */
 (function(){
-  var APP_VER = "20260910-1025";
+  var APP_VER = "20260910-1200";
   try{
     fetch("version.txt?t=" + Date.now(), {cache:"no-store"})
       .then(function(r){ return r.ok ? r.text() : ""; })
