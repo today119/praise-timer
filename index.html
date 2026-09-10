@@ -164,6 +164,12 @@
   .songwrap{flex:1 1 auto;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;border-radius:16px;overflow:hidden}
   .songwrap[hidden]{display:none}
   .songwrap iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
+  .bgmbar{display:flex; align-items:center; gap:8px}
+  .bgmvol{display:flex; align-items:center; gap:6px; background:rgba(255,255,255,.9);
+    border:2px solid var(--line,#e3ddf3); border-radius:16px; padding:.35em .7em; font-size:15px}
+  .bgmvol input{width:clamp(70px,9vw,130px)}
+  .bgmvol b{min-width:2.2em; text-align:right; color:var(--sub); font-size:14px}
+  @media (max-width:820px){ .bgmvol{display:none} }
   .songcheck{display:flex; align-items:center; gap:10px; margin-top:8px; font-size:14px; color:var(--sub); min-height:24px}
   .songcheck img{width:120px; border-radius:10px; border:2px solid var(--line,#e3ddf3); display:block}
   .songcheck b{color:#2f9e6b}
@@ -434,6 +440,12 @@
     .songwrap{flex:1 1 auto;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;border-radius:16px;overflow:hidden}
   .songwrap[hidden]{display:none}
   .songwrap iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
+  .bgmbar{display:flex; align-items:center; gap:8px}
+  .bgmvol{display:flex; align-items:center; gap:6px; background:rgba(255,255,255,.9);
+    border:2px solid var(--line,#e3ddf3); border-radius:16px; padding:.35em .7em; font-size:15px}
+  .bgmvol input{width:clamp(70px,9vw,130px)}
+  .bgmvol b{min-width:2.2em; text-align:right; color:var(--sub); font-size:14px}
+  @media (max-width:820px){ .bgmvol{display:none} }
   .songcheck{display:flex; align-items:center; gap:10px; margin-top:8px; font-size:14px; color:var(--sub); min-height:24px}
   .songcheck img{width:120px; border-radius:10px; border:2px solid var(--line,#e3ddf3); display:block}
   .songcheck b{color:#2f9e6b}
@@ -590,7 +602,10 @@
       <button class="tbtn" id="resetBtn">↺</button>
     </div>
 
-    <button class="btn ghost" id="bgmBtn" hidden>🎹 음악 끄기</button>
+    <div class="bgmbar" id="bgmBar" hidden>
+      <button class="btn ghost" id="bgmBtn">🎹 음악 끄기</button>
+      <span class="bgmvol">🔉<input type="range" id="bgmVol" min="0" max="100" step="5"><b id="bgmVolNo">20</b></span>
+    </div>
     <button class="btn primary" id="changeBtn" hidden>🥕 당근왔숑! →</button>
     <button class="btn blue" id="nextBtn">다음 →</button>
     <span class="counterchip" id="slideNo">1 / 20</span>
@@ -1023,11 +1038,14 @@
   /* 음악을 틀 슬라이드는 DECK 에 bgm:1 로 표시한다 (그림책 읽기 · 학부모 메모) */
   function syncBgm(){
     var have = useFile() || !!bgmId();
-    var onAct = !!cur().bgm;
+    /* 그림책은 표지(1쪽)에서는 조용히, 「다같이 읽어 봅시다」 다음 쪽부터 음악 */
+    var onAct = !!cur().bgm && !(cur().act === "book" && bookIdx === 0);
     var want = bgmOn && have && onAct;
+    $("bgmBar").hidden = !(have && !!cur().bgm);
     var btn = $("bgmBtn");
-    btn.hidden = !(have && onAct);
     btn.textContent = bgmOn ? "🎹 음악 끄기" : "🎹 음악 켜기";
+    $("bgmVol").value = Number(cfg.bgmVol) || 20;
+    $("bgmVolNo").textContent = Number(cfg.bgmVol) || 20;
     if(want === bgmWant) return;
     bgmWant = want;
     if(want){ if(!useFile() && !bgmPlayer){ loadYTApi(); makeBgm(); } bgmPlay(); }
@@ -1455,6 +1473,7 @@
     bookIdx = Math.max(0, Math.min(n - 1, k));
     if(cur().act === "book") shot.setAttribute("src", bookUrl(bookIdx));
     renderBookNav();
+    syncBgm();
     if(!$("bookView").hidden){ $("bvImg").src = bookUrl(bookIdx); renderBV(); }
   }
   function renderBV(){
@@ -1791,6 +1810,14 @@
   $("bkPrev").addEventListener("click", function(){ bookGo(bookIdx - 1); });
   $("bkNext").addEventListener("click", function(){ bookGo(bookIdx + 1); });
   $("bkFull").addEventListener("click", openBookView);
+  $("bgmVol").addEventListener("input", function(){
+    var v = Number($("bgmVol").value);
+    cfg.bgmVol = v; saveCfg();
+    $("bgmVolNo").textContent = v;
+    if($("cBgmVol")) { $("cBgmVol").value = v; $("cBgmVolNo").textContent = v; }
+    try{ $("bgmAudio").volume = Math.max(0, Math.min(1, v/100)); }catch(e){}
+    try{ if(bgmPlayer && bgmReady) bgmPlayer.setVolume(v); }catch(e){}
+  });
   $("bgmBtn").addEventListener("click", function(){
     bgmOn = !bgmOn;
     syncBgm();
@@ -1982,7 +2009,7 @@
 <script>
 /* 새 버전이 올라오면 브라우저가 옛 화면을 붙들고 있지 않도록 스스로 다시 받아온다 */
 (function(){
-  var APP_VER = "20260910-1537";
+  var APP_VER = "20260910-1605";
   try{
     fetch("version.txt?t=" + Date.now(), {cache:"no-store"})
       .then(function(r){ return r.ok ? r.text() : ""; })
