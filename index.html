@@ -164,6 +164,10 @@
   .songwrap{flex:1 1 auto;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;border-radius:16px;overflow:hidden}
   .songwrap[hidden]{display:none}
   .songwrap iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
+  .songcheck{display:flex; align-items:center; gap:10px; margin-top:8px; font-size:14px; color:var(--sub); min-height:24px}
+  .songcheck img{width:120px; border-radius:10px; border:2px solid var(--line,#e3ddf3); display:block}
+  .songcheck b{color:#2f9e6b}
+  .songcheck .bad{color:#d9534f; font-weight:800}
   .bookfile{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .bookstat{font-size:14px;color:var(--sub)}
   .booknav{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0 10px;flex-wrap:wrap}
@@ -430,6 +434,10 @@
     .songwrap{flex:1 1 auto;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;border-radius:16px;overflow:hidden}
   .songwrap[hidden]{display:none}
   .songwrap iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
+  .songcheck{display:flex; align-items:center; gap:10px; margin-top:8px; font-size:14px; color:var(--sub); min-height:24px}
+  .songcheck img{width:120px; border-radius:10px; border:2px solid var(--line,#e3ddf3); display:block}
+  .songcheck b{color:#2f9e6b}
+  .songcheck .bad{color:#d9534f; font-weight:800}
   .bookfile{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .bookstat{font-size:14px;color:var(--sub)}
   .booknav{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0 10px;flex-wrap:wrap}
@@ -640,8 +648,9 @@
 
     <div class="row">
       <label for="cSong">🎵 수업 시작 노래 (유튜브 주소)
-        <span style="font-weight:600;color:var(--sub)">비워 두면 노래 슬라이드가 안 나와요</span></label>
-      <input type="text" id="cSong" placeholder="https://www.youtube.com/watch?v=...">
+        <span style="font-weight:600;color:var(--sub)">맨 첫 화면에서 이 영상이 나와요 · 비워 두면 안 나옵니다</span></label>
+      <input type="text" id="cSong" placeholder="https://www.youtube.com/watch?v=... 또는 https://youtu.be/...">
+      <div class="songcheck" id="cSongCheck"></div>
     </div>
 
     <div class="sec-title s1"><span class="no">1</span>그림책 읽기</div>
@@ -849,9 +858,10 @@
   function songId(){
     var u = String(cfg.song || "").trim();
     if(!u) return "";
-    var m = u.match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{6,})/);
+    var m = u.match(/(?:youtu\.be\/|[?&]v=|\/v\/|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{8,})/);
     if(m) return m[1];
-    return /^[A-Za-z0-9_-]{6,}$/.test(u) ? u : "";
+    m = u.match(/([A-Za-z0-9_-]{11})/);          /* 영상 번호만 붙여넣은 경우 */
+    return m ? m[1] : "";
   }
   function buildDeck(){
     DECK = BASE_DECK.slice();
@@ -1727,6 +1737,20 @@
   }
 
   /* 그림책 버튼 연결 */
+  function songCheck(){
+    var box = $("cSongCheck");
+    var v = $("cSong").value.trim();
+    if(!v){ box.innerHTML = '<span>비워 두면 노래 화면이 안 나옵니다.</span>'; return; }
+    var save = cfg.song; cfg.song = v;            /* 잠깐 넣어보고 되돌린다 */
+    var id = songId();
+    cfg.song = save;
+    box.innerHTML = id
+      ? '<img src="https://i.ytimg.com/vi/' + id + '/mqdefault.jpg" alt="">' +
+        '<span><b>✅ 이 영상으로 나와요</b><br>맞으면 아래 「저장하고 닫기」를 눌러주세요</span>'
+      : '<span class="bad">⚠️ 주소를 못 알아봤어요</span><span>유튜브 영상 주소를 통째로 붙여넣어 주세요<br>(예: https://youtu.be/abcd1234xyz)</span>';
+  }
+  $("cSong").addEventListener("input", songCheck);
+
   $("cBgmVol").addEventListener("input", function(){
     var v = Number($("cBgmVol").value);
     $("cBgmVolNo").textContent = v;
@@ -1807,6 +1831,7 @@
   /* ================= 설정 ================= */
   function fillSetup(){
     $("cSong").value = cfg.song || "";
+    songCheck();
     $("c1Sec").value = Math.round(cfg.s1.sec/60);
     $("c1Book").value = cfg.s1.book;
     $("cBgm").value = cfg.bgm || "";
@@ -1957,7 +1982,7 @@
 <script>
 /* 새 버전이 올라오면 브라우저가 옛 화면을 붙들고 있지 않도록 스스로 다시 받아온다 */
 (function(){
-  var APP_VER = "20260910-1410";
+  var APP_VER = "20260910-1415";
   try{
     fetch("version.txt?t=" + Date.now(), {cache:"no-store"})
       .then(function(r){ return r.ok ? r.text() : ""; })
