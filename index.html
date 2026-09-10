@@ -298,7 +298,11 @@
     position:fixed; inset:0; z-index:50; display:none;
     align-items:center; justify-content:center; flex-direction:column; gap:clamp(12px,2.6vh,34px);
     text-align:center; padding:4vh 4vw;
+    /* 창이 낮으면 설정 내용이 화면을 넘는다 → 넘칠 땐 스크롤되게(위쪽이 잘려 못 올라가던 문제) */
+    overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
   }
+  /* 설정은 내용이 길어서 가운데 정렬하면 위쪽이 잘려 못 올라간다 → 위에서부터 쌓고 스크롤 */
+  #setup{ justify-content:flex-start; align-items:stretch; }
   .overlay.show{display:flex}
   #moveOverlay{background:linear-gradient(160deg,#F97316,#FB923C)}
   #moveOverlay *{color:#fff}
@@ -348,7 +352,7 @@
 
   /* 설정 */
   #setup{background:rgba(255,247,237,.97); overflow:auto; align-items:flex-start}
-  .setup-box{background:var(--card); border-radius:var(--r); box-shadow:var(--shadow); width:min(980px,94vw); margin:auto; padding:clamp(18px,2.7vh,34px); text-align:left}
+  .setup-box{background:var(--card); border-radius:var(--r); box-shadow:var(--shadow); width:min(980px,94vw); margin:0 auto; padding:clamp(18px,2.7vh,34px); text-align:left}
   .setup-box h1{font-family:var(--font-title); font-size:clamp(21px,3.1vh,35px); margin-bottom:.15em}
   .setup-box .desc{color:var(--sub); font-size:clamp(12px,1.7vh,18px); margin-bottom:1.2em; line-height:1.5}
   .sec-title{display:flex; align-items:center; gap:.5em; margin:1.5em 0 .75em; font-size:clamp(15px,2.2vh,23px); font-weight:900; padding-bottom:.5em; border-bottom:2px solid var(--line)}
@@ -1726,7 +1730,7 @@
 <script>
 /* 새 버전이 올라오면 브라우저가 옛 화면을 붙들고 있지 않도록 스스로 다시 받아온다 */
 (function(){
-  var APP_VER = "20260910-0939";
+  var APP_VER = "20260910-0956";
   try{
     fetch("version.txt?t=" + Date.now(), {cache:"no-store"})
       .then(function(r){ return r.ok ? r.text() : ""; })
