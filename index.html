@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<script>window.APP_VER="20260910-1613";</script>
 <style>
   :root{
     --bg:#FFF7ED; --card:#FFFFFF; --ink:#1F2937; --sub:#6B7280;
@@ -164,6 +165,13 @@
   .songwrap{flex:1 1 auto;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;border-radius:16px;overflow:hidden}
   .songwrap[hidden]{display:none}
   .songwrap iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
+  .tpreset{display:flex; gap:5px; margin-left:6px; padding-left:8px; border-left:2px dashed var(--line,#e3ddf3)}
+  .tpreset[hidden]{display:none}
+  .tpreset button{
+    font-family:inherit; font-size:clamp(13px,1.7vh,17px); font-weight:800; cursor:pointer;
+    border:2px solid var(--line,#e3ddf3); background:#fff; color:var(--sub); border-radius:12px; padding:.3em .6em;
+  }
+  .tpreset button.on{background:var(--theme,#7c5cd6); border-color:var(--theme,#7c5cd6); color:#fff}
   .bgmbar{display:flex; align-items:center; gap:8px}
   .bgmvol{display:flex; align-items:center; gap:6px; background:rgba(255,255,255,.9);
     border:2px solid var(--line,#e3ddf3); border-radius:16px; padding:.35em .7em; font-size:15px}
@@ -440,6 +448,13 @@
     .songwrap{flex:1 1 auto;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;border-radius:16px;overflow:hidden}
   .songwrap[hidden]{display:none}
   .songwrap iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
+  .tpreset{display:flex; gap:5px; margin-left:6px; padding-left:8px; border-left:2px dashed var(--line,#e3ddf3)}
+  .tpreset[hidden]{display:none}
+  .tpreset button{
+    font-family:inherit; font-size:clamp(13px,1.7vh,17px); font-weight:800; cursor:pointer;
+    border:2px solid var(--line,#e3ddf3); background:#fff; color:var(--sub); border-radius:12px; padding:.3em .6em;
+  }
+  .tpreset button.on{background:var(--theme,#7c5cd6); border-color:var(--theme,#7c5cd6); color:#fff}
   .bgmbar{display:flex; align-items:center; gap:8px}
   .bgmvol{display:flex; align-items:center; gap:6px; background:rgba(255,255,255,.9);
     border:2px solid var(--line,#e3ddf3); border-radius:16px; padding:.35em .7em; font-size:15px}
@@ -600,6 +615,7 @@
       <button class="tbtn go" id="startBtn">시작</button>
       <button class="tbtn" id="plusBtn">+1분</button>
       <button class="tbtn" id="resetBtn">↺</button>
+      <span class="tpreset" id="tPreset"></span>
     </div>
 
     <div class="bgmbar" id="bgmBar" hidden>
@@ -811,7 +827,7 @@
     {img:"img/ex2.jpg",        stage:2, name:"예시 2"},
     {img:"img/carrots.jpg",    stage:2, name:"장점 4칸"},
     {img:"img/hintcard.jpg",   stage:2, name:"장점 힌트 카드"},
-    {img:"img/worksheet.jpg",  stage:2, act:"write",  sec:"s2", name:"장점 쓰기"},
+    {img:"img/worksheet.jpg",  stage:2, act:"write",  sec:"s2", mins:[3,4,5], name:"장점 쓰기"},
     {img:"img/act2.jpg",       stage:3, name:"활동 2"},
     {img:"img/market.jpg",     stage:3, name:"장점마켓 안내"},
     {img:"img/market.jpg",     stage:3, act:"market", sec:"s3", name:"당근 장점마켓"},
@@ -882,6 +898,11 @@
     DECK = BASE_DECK.slice();
     if(songId()) DECK.unshift({img:"img/intro.jpg", stage:1, song:true, name:"노래 부르기"});
     if(idx >= DECK.length) idx = DECK.length - 1;
+  }
+  /* 그림도 브라우저가 옛것을 붙들지 않도록 주소에 버전을 붙인다 */
+  function bust(u){
+    if(!u || /^(data:|blob:|https?:)/.test(u) || u.indexOf("v=") >= 0) return u;
+    return u + (u.indexOf("?") < 0 ? "?" : "&") + "v=" + window.APP_VER;
   }
   function cur(){ return DECK[idx]; }
   function actSec(a){ return a ? cfg[cur().sec].sec : 0; }
@@ -1169,6 +1190,7 @@
   function setTimer(sec){
     T.total = sec * 1000; T.remain = T.total; T.run = false; T.warned = false;
     document.body.classList.remove("warn");
+    if(document.getElementById("tPreset")) renderPreset();
   }
   function play(){
     if(!cur().act) return;
@@ -1187,6 +1209,24 @@
     bell(); renderTimer();
   }
 
+  function renderPreset(){
+    var box = $("tPreset");
+    var mins = cur().mins;
+    if(!mins || !cur().act){ box.hidden = true; box.innerHTML = ""; return; }
+    box.hidden = false;
+    var now = Math.round(T.total / 60000);
+    box.innerHTML = "";
+    mins.forEach(function(m){
+      var b = document.createElement("button");
+      b.textContent = m + "분";
+      if(m === now) b.className = "on";
+      b.onclick = function(){
+        cfg[cur().sec].sec = m * 60; saveCfg();
+        setTimer(m * 60); renderTimer(); renderPreset();
+      };
+      box.appendChild(b);
+    });
+  }
   function renderTimer(){
     var a = cur().act;
     if(!a){ tchip.hidden = true; return; }
@@ -1268,7 +1308,7 @@
   function bookUrl(i){                       // i = 범위 안 순번
     var r = bookRange(), k = r[0] + i;
     if(k < 0 || k >= bookTotal()) return "";
-    if(usingBuiltin()) return BUILTIN_BOOK[k];
+    if(usingBuiltin()) return bust(BUILTIN_BOOK[k]);
     if(!bookUrls[k]) bookUrls[k] = URL.createObjectURL(BOOK[k]);
     return bookUrls[k];
   }
@@ -1533,7 +1573,7 @@
         wrap.className = "pop" + (fxOpen[key] ? " in" : "");
         wrap.style.left = sp.x + "%"; wrap.style.top = sp.y + "%";
         wrap.style.width = sp.w + "%"; wrap.style.height = sp.h + "%";
-        wrap.innerHTML = '<img src="' + sp.pop + '" alt="' + esc(sp.label || "") + '">';
+        wrap.innerHTML = '<img src="' + bust(sp.pop) + '" alt="' + esc(sp.label || "") + '">';
         box.appendChild(wrap);
 
         var tap = document.createElement("button");
@@ -1602,7 +1642,7 @@
     }
 
     var n = (s.act === "book") ? bookCount() : 0;
-    var src = n ? bookUrl(Math.min(bookIdx, n - 1)) : s.img;
+    var src = n ? bookUrl(Math.min(bookIdx, n - 1)) : bust(s.img);
     if(shot.getAttribute("src") !== src) shot.setAttribute("src", src);
     shot.setAttribute("alt", s.name);
 
@@ -1628,6 +1668,7 @@
     $("slideNo").textContent = (idx + 1) + " / " + DECK.length;
 
     renderTimer();
+    renderPreset();
     syncBgm();
     buildFx();
   }
@@ -1992,7 +2033,7 @@
   loadYTApi();
   // 다음 슬라이드 미리 받아두기
   buildDeck();
-  BASE_DECK.forEach(function(s){ var im = new Image(); im.src = s.img; });
+  BASE_DECK.forEach(function(s){ var im = new Image(); im.src = bust(s.img); });
 
   bgmFileLoad().then(function(f){ BGM_FILE = f || null; bgmFileStat(); syncBgm(); });
   $("bgmAudio").addEventListener("error", function(){
@@ -2009,7 +2050,7 @@
 <script>
 /* 새 버전이 올라오면 브라우저가 옛 화면을 붙들고 있지 않도록 스스로 다시 받아온다 */
 (function(){
-  var APP_VER = "20260910-1605";
+  var APP_VER = window.APP_VER;
   try{
     fetch("version.txt?t=" + Date.now(), {cache:"no-store"})
       .then(function(r){ return r.ok ? r.text() : ""; })
