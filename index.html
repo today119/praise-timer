@@ -736,7 +736,7 @@
   /* ================= 수업 슬라이드 덱 ================= */
   var BASE_DECK = [
     {img:"img/intro.jpg",      stage:1, name:"대문"},
-    {img:"img/book.jpg",       stage:1, act:"book",   sec:"s1", name:"그림책 읽기"},
+    {img:"img/book.jpg",       stage:1, act:"book",   sec:"s1", bgm:1, name:"그림책 읽기"},
     {img:"img/q1.jpg",         stage:1, name:"발문 1"},
     {img:"img/q2.jpg",         stage:1, name:"발문 2"},
     {img:"img/goal.jpg",       stage:1, name:"학습 목표"},
@@ -752,7 +752,7 @@
     {img:"img/market.jpg",     stage:3, name:"장점마켓 안내"},
     {img:"img/market.jpg",     stage:3, act:"market", sec:"s3", name:"당근 장점마켓"},
     {img:"img/wrapup.jpg",     stage:4, act:"letter", sec:"s4", name:"정리 · 편지 쓰기"},
-    {img:"img/parents.jpg",    stage:4, name:"학부모 메모"},
+    {img:"img/parents.jpg",    stage:4, bgm:1, name:"학부모 메모"},
     {img:"img/mirrors.jpg",    stage:4, name:"세 거울"},
     {img:"img/thanks.jpg",     stage:4, name:"감사합니다"}
   ];
@@ -970,11 +970,10 @@
     try{ $("bgmAudio").pause(); }catch(e){}
     try{ if(bgmPlayer && bgmReady) bgmPlayer.pauseVideo(); }catch(e){}
   }
-  /* 그림책 읽기 · 편지 쓰기 화면에서만 흐르게 한다 */
-  var BGM_ACTS = {book:1, letter:1};
+  /* 음악을 틀 슬라이드는 DECK 에 bgm:1 로 표시한다 (그림책 읽기 · 학부모 메모) */
   function syncBgm(){
     var have = useFile() || !!bgmId();
-    var onAct = !!BGM_ACTS[cur().act];
+    var onAct = !!cur().bgm;
     var want = bgmOn && have && onAct;
     var btn = $("bgmBtn");
     btn.hidden = !(have && onAct);
@@ -1819,7 +1818,7 @@
 <script>
 /* 새 버전이 올라오면 브라우저가 옛 화면을 붙들고 있지 않도록 스스로 다시 받아온다 */
 (function(){
-  var APP_VER = "20260910-1012";
+  var APP_VER = "20260910-1025";
   try{
     fetch("version.txt?t=" + Date.now(), {cache:"no-store"})
       .then(function(r){ return r.ok ? r.text() : ""; })
