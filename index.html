@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
-<script>window.APP_VER="20260910-1622";</script>
+<script>window.APP_VER="20260910-1626";</script>
 <style>
   :root{
     --bg:#FFF7ED; --card:#FFFFFF; --ink:#1F2937; --sub:#6B7280;
@@ -815,6 +815,7 @@
 
   /* ================= 수업 슬라이드 덱 ================= */
   var BASE_DECK = [
+    {img:"img/notice.jpg",     stage:1, name:"학부모 안내"},
     {img:"img/intro.jpg",      stage:1, name:"대문"},
     {img:"img/book.jpg",       stage:1, act:"book",   sec:"s1", bgm:1, name:"그림책 읽기"},
     {img:"img/q1.jpg",         stage:1, name:"발문 1"},
@@ -896,7 +897,7 @@
   }
   function buildDeck(){
     DECK = BASE_DECK.slice();
-    if(songId()) DECK.unshift({img:"img/intro.jpg", stage:1, song:true, name:"노래 부르기"});
+    if(songId()) DECK.splice(1, 0, {img:"img/intro.jpg", stage:1, song:true, name:"노래 부르기"});
     if(idx >= DECK.length) idx = DECK.length - 1;
   }
   /* 그림도 브라우저가 옛것을 붙들지 않도록 주소에 버전을 붙인다 */
